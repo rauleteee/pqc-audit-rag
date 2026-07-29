@@ -143,6 +143,23 @@ it gives the best Hit Rate (0.877) but slightly lower MRR, so `rerank` stays the
 default. All three best practices (hybrid, re-ranking, query rewriting) live in
 `search.py`; `PQC_RAG_RETRIEVAL` / the UI selector switch strategy.
 
+## LLM evaluation
+
+Three synthesis prompt styles (concise / detailed / checklist) are compared with an
+**LLM-as-judge** (`evaluation/evaluate_llm.py`, writes `LLM_RESULTS.md`): the judge
+scores each recommendation for **faithfulness** (grounded in the retrieved context)
+and **actionability** (concrete, correct steps), 1–5, over the sample's 6 exposures.
+Latest run (judge & synthesizer = llama3.1):
+
+| Prompt style | Faithfulness | Actionability | Overall |
+|---|---|---|---|
+| **concise — best** | 5.00 | 4.17 | **4.58** |
+| detailed | 4.83 | 4.17 | 4.50 |
+| checklist | 4.83 | 4.17 | 4.50 |
+
+Margins are small (all three are solid); `concise` edges ahead on faithfulness and
+is the default (`PQC_RAG_PROMPT`).
+
 ## Evaluation criteria map (LLM Zoomcamp)
 
 This section is filled in as each phase lands, so reviewers can find the
@@ -153,7 +170,7 @@ relevant code quickly.
 | Problem description | this README | ✅ |
 | Retrieval flow (KB + LLM) | `retrieval.py`, `synthesis.py`, `pipeline.py` | ✅ |
 | Retrieval evaluation | `evaluation/evaluate_retrieval.py`, `RESULTS.md` (4 methods) | ✅ |
-| LLM evaluation | `evaluation/` (LLM-as-judge, prompts) | ⏳ |
+| LLM evaluation | `evaluation/evaluate_llm.py`, `LLM_RESULTS.md` (3 prompts, judge) | ✅ |
 | Interface | `app/streamlit_app.py` (Streamlit UI) | ✅ |
 | Ingestion pipeline | `knowledge_base/ingest.py` (LanceDB) + `ingestion/dlt_pipeline.py` (dlt→DuckDB) | ✅ (automated) |
 | Monitoring | user feedback in `feedback.py`; Postgres + Grafana next | 🟡 feedback done |
@@ -172,7 +189,8 @@ relevant code quickly.
 3. ✅ Retrieval evaluation (dense vs text vs hybrid/RRF vs re-ranking; Hit
    Rate/MRR over a 45-chunk corpus, 269 LLM-generated questions). Winner
    (hybrid + rerank) is the default.
-4. ⏳ LLM evaluation (multiple prompts + LLM-as-judge) + query rewriting.
+4. ✅ LLM evaluation (3 prompt styles compared with an LLM-as-judge) + query
+   rewriting best practice.
 5. ✅ Streamlit UI + user feedback.
 6. ⏳ Monitoring (Postgres + Grafana, ≥5 charts).
 7. ⏳ Containerization (docker-compose) + reproducibility polish.

@@ -136,8 +136,8 @@ def main() -> None:
         model = st.text_input("LLM model", value=settings.llm_model)
         method = st.selectbox(
             "Retrieval method",
-            ["hybrid", "rerank", "dense", "text"],
-            help="Evaluated in evaluation/RESULTS.md; 'hybrid' (RRF) scored best.",
+            ["rerank", "hybrid", "dense", "text"],
+            help="Evaluated in evaluation/RESULTS.md; 'rerank' scored best.",
         )
         top_k = st.slider("Retrieved passages (top-k)", 1, 8, settings.top_k)
         run = st.button("Run audit", type="primary", use_container_width=True)

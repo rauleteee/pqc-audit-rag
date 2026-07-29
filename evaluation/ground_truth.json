@@ -1,50 +1,1078 @@
 [
-  {"question": "Why can a quantum computer break RSA-2048, and which algorithm does it?", "chunk_id": "algorithm_details.md#1"},
-  {"question": "What hard problem does RSA rely on that Shor's algorithm defeats?", "chunk_id": "algorithm_details.md#1"},
-  {"question": "Which named elliptic curves like P-256 and secp256k1 are quantum-vulnerable?", "chunk_id": "algorithm_details.md#2"},
-  {"question": "What problem does elliptic-curve cryptography rely on that Shor breaks?", "chunk_id": "algorithm_details.md#2"},
-  {"question": "Is DSA still approved for generating signatures under FIPS 186-5?", "chunk_id": "algorithm_details.md#3"},
-  {"question": "What are MODP groups in finite-field Diffie-Hellman and are they safe?", "chunk_id": "algorithm_details.md#3"},
-  {"question": "Is Ed25519 quantum-safe and what should it migrate to?", "chunk_id": "algorithm_details.md#4"},
-  {"question": "By how much does Grover's algorithm weaken AES-128?", "chunk_id": "algorithm_details.md#5"},
-  {"question": "What is a Cryptography Bill of Materials (CBOM)?", "chunk_id": "crypto_agility_and_cbom.md#1"},
-  {"question": "Which CycloneDX version adds cryptographic-asset components for inventory?", "chunk_id": "crypto_agility_and_cbom.md#1"},
-  {"question": "What is crypto-agility and why does it help post-quantum migration?", "chunk_id": "crypto_agility_and_cbom.md#2"},
-  {"question": "Why combine a classical and a post-quantum algorithm during the transition?", "chunk_id": "crypto_agility_and_cbom.md#3"},
-  {"question": "How should I pilot and roll out PQC given larger keys and signatures?", "chunk_id": "crypto_agility_and_cbom.md#4"},
-  {"question": "What does pyca cryptography's rsa.generate_private_key produce and how to migrate it?", "chunk_id": "library_migration_notes.md#1"},
-  {"question": "Does the pyca cryptography library support ML-KEM natively yet?", "chunk_id": "library_migration_notes.md#1"},
-  {"question": "How should PyNaCl SigningKey and Box keys be migrated to post-quantum?", "chunk_id": "library_migration_notes.md#2"},
-  {"question": "How do I make paramiko SSH connections quantum-resistant?", "chunk_id": "library_migration_notes.md#3"},
-  {"question": "How to migrate PyJWT RS256 and ES256 token signing to post-quantum?", "chunk_id": "library_migration_notes.md#4"},
-  {"question": "How to migrate pyOpenSSL X.509 certificate keys to post-quantum?", "chunk_id": "library_migration_notes.md#5"},
-  {"question": "What does pycryptodome RSA.generate create and what replaces it?", "chunk_id": "library_migration_notes.md#6"},
-  {"question": "What is ML-KEM and which FIPS standard defines it?", "chunk_id": "nist_standards.md#1"},
-  {"question": "Which ML-KEM parameter set is the recommended default for key establishment?", "chunk_id": "nist_standards.md#1"},
-  {"question": "Which algorithm is the primary FIPS 204 standard for digital signatures?", "chunk_id": "nist_standards.md#2"},
-  {"question": "What is FIPS 205 SLH-DSA and when should it be used?", "chunk_id": "nist_standards.md#3"},
-  {"question": "When did NIST publish the first finalized post-quantum standards?", "chunk_id": "nist_standards.md#0"},
-  {"question": "What AES key size resists Grover for symmetric encryption per NIST?", "chunk_id": "nist_standards.md#4"},
-  {"question": "What should ECDH and Diffie-Hellman key exchange migrate to?", "chunk_id": "primitive_mapping.md#1"},
-  {"question": "Which post-quantum standard replaces ECDSA and EdDSA signatures?", "chunk_id": "primitive_mapping.md#2"},
-  {"question": "How should RSA signatures using PKCS#1 or PSS be mapped for migration?", "chunk_id": "primitive_mapping.md#2"},
-  {"question": "Is AES-128 broken by quantum computers, and what should replace it?", "chunk_id": "primitive_mapping.md#3"},
-  {"question": "Which hash functions like MD5 and SHA-1 are broken and must be replaced?", "chunk_id": "primitive_mapping.md#4"},
-  {"question": "Do I need to migrate code that already uses Kyber or Dilithium?", "chunk_id": "primitive_mapping.md#5"},
-  {"question": "How is the primitive-to-target migration mapping organized by usage?", "chunk_id": "primitive_mapping.md#0"},
-  {"question": "Which backup KEM did NIST select in 2025 based on code-based assumptions?", "chunk_id": "standards_and_bodies.md#1"},
-  {"question": "What is the NIST on-ramp for additional post-quantum signature schemes?", "chunk_id": "standards_and_bodies.md#1"},
-  {"question": "Which IETF working groups integrate post-quantum algorithms into protocols?", "chunk_id": "standards_and_bodies.md#2"},
-  {"question": "What role do ETSI and ISO/IEC play in quantum-safe cryptography?", "chunk_id": "standards_and_bodies.md#3"},
-  {"question": "How should migration be prioritized by data confidentiality lifetime and exposure?", "chunk_id": "standards_and_bodies.md#4"},
-  {"question": "What is the NSA CNSA 2.0 timeline for adopting post-quantum algorithms?", "chunk_id": "timelines_compliance.md#1"},
-  {"question": "What did OMB memorandum M-23-02 direct US federal agencies to do?", "chunk_id": "timelines_compliance.md#2"},
-  {"question": "What do Germany's BSI and France's ANSSI recommend for the PQC transition?", "chunk_id": "timelines_compliance.md#3"},
-  {"question": "What does harvest-now decrypt-later mean and why is it urgent?", "chunk_id": "timelines_compliance.md#4"},
-  {"question": "What is the X25519MLKEM768 hybrid group used for in TLS 1.3?", "chunk_id": "tls_and_protocols.md#1"},
-  {"question": "Which TLS 1.3 key exchange protects against harvest-now-decrypt-later?", "chunk_id": "tls_and_protocols.md#1"},
-  {"question": "Which OpenSSH key exchange algorithms are post-quantum hybrids?", "chunk_id": "tls_and_protocols.md#2"},
-  {"question": "How does RFC 9370 enable post-quantum key exchange in IKEv2 and IPsec?", "chunk_id": "tls_and_protocols.md#3"},
-  {"question": "How should X.509 certificate authorities migrate to post-quantum signatures?", "chunk_id": "tls_and_protocols.md#4"},
-  {"question": "How does S/MIME secure email migrate to post-quantum cryptography?", "chunk_id": "tls_and_protocols.md#5"}
+  {
+    "question": "What is the source of information for understanding why certain cryptographic primitives are vulnerable to quantum attacks?",
+    "chunk_id": "algorithm_details.md#0"
+  },
+  {
+    "question": "Which specific digital signature standard has been identified as being broken in the face of quantum computing?",
+    "chunk_id": "algorithm_details.md#0"
+  },
+  {
+    "question": "Can you provide examples of NIST publications that detail post-quantum cryptography efforts?",
+    "chunk_id": "algorithm_details.md#0"
+  },
+  {
+    "question": "How do migration decisions regarding cryptographic algorithms rely on knowledge of their vulnerability to quantum attacks?",
+    "chunk_id": "algorithm_details.md#0"
+  },
+  {
+    "question": "What is the purpose of referencing NIST's Post-Quantum Cryptography project in this context?",
+    "chunk_id": "algorithm_details.md#0"
+  },
+  {
+    "question": "Are there any specific standards or documents mentioned as being relevant to understanding the implications of quantum computing for digital signatures?",
+    "chunk_id": "algorithm_details.md#0"
+  },
+  {
+    "question": "What is the basis of RSA's security?",
+    "chunk_id": "algorithm_details.md#1"
+  },
+  {
+    "question": "How does Shor's algorithm affect RSA-2048 keys?",
+    "chunk_id": "algorithm_details.md#1"
+  },
+  {
+    "question": "What type of cryptography is vulnerable to quantum computers according to this passage?",
+    "chunk_id": "algorithm_details.md#1"
+  },
+  {
+    "question": "Is it possible to factor large integers in polynomial time on a classical computer using Shor's algorithm?",
+    "chunk_id": "algorithm_details.md#1"
+  },
+  {
+    "question": "Why are RSA-3072 and RSA-4096 considered broken?",
+    "chunk_id": "algorithm_details.md#1"
+  },
+  {
+    "question": "What should be done with existing RSA key transport systems?",
+    "chunk_id": "algorithm_details.md#1"
+  },
+  {
+    "question": "What is the specific problem that elliptic-curve cryptography relies on?",
+    "chunk_id": "algorithm_details.md#2"
+  },
+  {
+    "question": "Which cryptographic algorithms are broken by Shor's algorithm?",
+    "chunk_id": "algorithm_details.md#2"
+  },
+  {
+    "question": "What are some common elliptic curves used in post-quantum cryptography?",
+    "chunk_id": "algorithm_details.md#2"
+  },
+  {
+    "question": "Is Curve25519 suitable for both ECDH key exchange and Ed25519 signatures?",
+    "chunk_id": "algorithm_details.md#2"
+  },
+  {
+    "question": "Why is secp256k1 used in Bitcoin and Ethereum?",
+    "chunk_id": "algorithm_details.md#2"
+  },
+  {
+    "question": "What type of signature scheme will replace ECDSA/EdDSA?",
+    "chunk_id": "algorithm_details.md#2"
+  },
+  {
+    "question": "What types of key agreement are broken by Shor's algorithm over MODP groups?",
+    "chunk_id": "algorithm_details.md#3"
+  },
+  {
+    "question": "Are there any specific FIPS standards that deprecate the use of DSA for signature generation?",
+    "chunk_id": "algorithm_details.md#3"
+  },
+  {
+    "question": "What is the recommended replacement for finite-field Diffie-Hellman (DH) key agreement?",
+    "chunk_id": "algorithm_details.md#3"
+  },
+  {
+    "question": "Why has DSA been deprecated in favor of ML-DSA, according to FIPS 186-5?",
+    "chunk_id": "algorithm_details.md#3"
+  },
+  {
+    "question": "Which cryptographic protocols are being migrated from MODP groups to new algorithms?",
+    "chunk_id": "algorithm_details.md#3"
+  },
+  {
+    "question": "What type of cryptographic curve does EdDSA use?",
+    "chunk_id": "algorithm_details.md#4"
+  },
+  {
+    "question": "In what types of protocols is Ed25519/Ed448 commonly found?",
+    "chunk_id": "algorithm_details.md#4"
+  },
+  {
+    "question": "Is EdDSA vulnerable to the Shor algorithm?",
+    "chunk_id": "algorithm_details.md#4"
+  },
+  {
+    "question": "How does EdDSA's performance compare to ECDSA in terms of speed?",
+    "chunk_id": "algorithm_details.md#4"
+  },
+  {
+    "question": "Can EdDSA be replaced by a different signature scheme in post-quantum cryptography?",
+    "chunk_id": "algorithm_details.md#4"
+  },
+  {
+    "question": "What is the recommended migration path for EdDSA in light of quantum computing threats?",
+    "chunk_id": "algorithm_details.md#4"
+  },
+  {
+    "question": "What is the impact of Grover's algorithm on symmetric key sizes?",
+    "chunk_id": "algorithm_details.md#5"
+  },
+  {
+    "question": "How does AES-128 compare to its post-quantum strength in terms of bit length?",
+    "chunk_id": "algorithm_details.md#5"
+  },
+  {
+    "question": "Is it recommended to replace AES-128 with a larger key size due to quantum computing threats?",
+    "chunk_id": "algorithm_details.md#5"
+  },
+  {
+    "question": "Which hashing algorithms are considered broken and should be replaced immediately?",
+    "chunk_id": "algorithm_details.md#5"
+  },
+  {
+    "question": "What is the preferred hashing algorithm for long-term use, assuming SHA-256 is acceptable?",
+    "chunk_id": "algorithm_details.md#5"
+  },
+  {
+    "question": "How does the post-quantum threat affect the choice between SHA-384/SHA-512 and SHA-3?",
+    "chunk_id": "algorithm_details.md#5"
+  },
+  {
+    "question": "What practices are recommended by NIST SP 1800-38 for a post-quantum migration?",
+    "chunk_id": "crypto_agility_and_cbom.md#0"
+  },
+  {
+    "question": "How can organizations ensure their post-quantum migration is safe according to the NCCoE guidelines?",
+    "chunk_id": "crypto_agility_and_cbom.md#0"
+  },
+  {
+    "question": "What is the relevance of CycloneDX cryptographic assets in the context of post-quantum cryptography?",
+    "chunk_id": "crypto_agility_and_cbom.md#0"
+  },
+  {
+    "question": "What guidance on transitioning to post-quantum cryptography should be followed, as per Germany BSI and France ANSSI recommendations?",
+    "chunk_id": "crypto_agility_and_cbom.md#0"
+  },
+  {
+    "question": "How can a post-quantum migration be made feasible according to the passage?",
+    "chunk_id": "crypto_agility_and_cbom.md#0"
+  },
+  {
+    "question": "Are there any specific sources that provide transition guidance for post-quantum cryptography mentioned in the passage?",
+    "chunk_id": "crypto_agility_and_cbom.md#0"
+  },
+  {
+    "question": "What is the first step in migrating to a post-quantum cryptography system?",
+    "chunk_id": "crypto_agility_and_cbom.md#1"
+  },
+  {
+    "question": "How should one approach identifying where cryptography is used within an existing system?",
+    "chunk_id": "crypto_agility_and_cbom.md#1"
+  },
+  {
+    "question": "What is the purpose of creating a Cryptography Bill of Materials (CBOM)?",
+    "chunk_id": "crypto_agility_and_cbom.md#1"
+  },
+  {
+    "question": "Which standard recommends building an inventory before migrating to a post-quantum cryptography system?",
+    "chunk_id": "crypto_agility_and_cbom.md#1"
+  },
+  {
+    "question": "What component type does CycloneDX 1.6 add for managing cryptographic assets?",
+    "chunk_id": "crypto_agility_and_cbom.md#1"
+  },
+  {
+    "question": "Why is it essential to create a CBOM according to the given principle?",
+    "chunk_id": "crypto_agility_and_cbom.md#1"
+  },
+  {
+    "question": "What is the primary goal of crypto-agility?",
+    "chunk_id": "crypto_agility_and_cbom.md#2"
+  },
+  {
+    "question": "How can systems be designed to accommodate changes in cryptographic algorithms without significant rework?",
+    "chunk_id": "crypto_agility_and_cbom.md#2"
+  },
+  {
+    "question": "What is the benefit of abstracting cryptographic operations behind interfaces?",
+    "chunk_id": "crypto_agility_and_cbom.md#2"
+  },
+  {
+    "question": "How does crypto-agility help with addressing vulnerabilities in cryptographic schemes?",
+    "chunk_id": "crypto_agility_and_cbom.md#2"
+  },
+  {
+    "question": "Can a system designed with crypto-agility principles switch between different key exchange and digital signature algorithms?",
+    "chunk_id": "crypto_agility_and_cbom.md#2"
+  },
+  {
+    "question": "What is the advantage of supporting negotiation and versioning in a cryptographic system?",
+    "chunk_id": "crypto_agility_and_cbom.md#2"
+  },
+  {
+    "question": "What is a hybrid approach to cryptography during the transition period?",
+    "chunk_id": "crypto_agility_and_cbom.md#3"
+  },
+  {
+    "question": "How can combining classical and post-quantum algorithms improve security?",
+    "chunk_id": "crypto_agility_and_cbom.md#3"
+  },
+  {
+    "question": "Is it possible to stay secure if one of the combined components is broken?",
+    "chunk_id": "crypto_agility_and_cbom.md#3"
+  },
+  {
+    "question": "Which organizations recommend using a hybrid key establishment method for the transition period?",
+    "chunk_id": "crypto_agility_and_cbom.md#3"
+  },
+  {
+    "question": "Can a hybrid system use X25519 and ML-KEM-768 as its components?",
+    "chunk_id": "crypto_agility_and_cbom.md#3"
+  },
+  {
+    "question": "What is the purpose of combining different cryptographic algorithms during the post-quantum cryptography transition?",
+    "chunk_id": "crypto_agility_and_cbom.md#3"
+  },
+  {
+    "question": "What is the recommended approach to deploying post-quantum cryptography?",
+    "chunk_id": "crypto_agility_and_cbom.md#4"
+  },
+  {
+    "question": "How should organizations prioritize their rollout of post-quantum keys and signatures?",
+    "chunk_id": "crypto_agility_and_cbom.md#4"
+  },
+  {
+    "question": "Can post-quantum cryptography be used in critical systems without significant performance degradation?",
+    "chunk_id": "crypto_agility_and_cbom.md#4"
+  },
+  {
+    "question": "What are some potential issues with using post-quantum keys and signatures in existing cryptographic protocols?",
+    "chunk_id": "crypto_agility_and_cbom.md#4"
+  },
+  {
+    "question": "Should organizations test the performance impact of post-quantum cryptography before widespread deployment?",
+    "chunk_id": "crypto_agility_and_cbom.md#4"
+  },
+  {
+    "question": "How can organizations minimize latency when implementing post-quantum key exchange algorithms?",
+    "chunk_id": "crypto_agility_and_cbom.md#4"
+  },
+  {
+    "question": "What Python cryptographic libraries are currently vulnerable to quantum attacks?",
+    "chunk_id": "library_migration_notes.md#0"
+  },
+  {
+    "question": "Which libraries have implemented post-quantum key exchange (ML-KEM) or digital signature schemes (ML-DSA)?",
+    "chunk_id": "library_migration_notes.md#0"
+  },
+  {
+    "question": "How do Python developers typically bridge the transition from old to new libraries during migration?",
+    "chunk_id": "library_migration_notes.md#0"
+  },
+  {
+    "question": "What is the recommended provider for post-quantum cryptography in OpenSSL?",
+    "chunk_id": "library_migration_notes.md#0"
+  },
+  {
+    "question": "Which library documentation should be consulted for information on post-quantum migration?",
+    "chunk_id": "library_migration_notes.md#0"
+  },
+  {
+    "question": "Are there any NIST guidelines or standards mentioned in relation to this topic?",
+    "chunk_id": "library_migration_notes.md#0"
+  },
+  {
+    "question": "What cryptographic algorithms are vulnerable to Shor's algorithm?",
+    "chunk_id": "library_migration_notes.md#1"
+  },
+  {
+    "question": "Which specific functions in the `cryptography` library produce keys that can be broken by quantum computers?",
+    "chunk_id": "library_migration_notes.md#1"
+  },
+  {
+    "question": "How should signatures be migrated according to this passage?",
+    "chunk_id": "library_migration_notes.md#1"
+  },
+  {
+    "question": "What is the recommended approach for key establishment in post-quantum cryptography, as per this passage?",
+    "chunk_id": "library_migration_notes.md#1"
+  },
+  {
+    "question": "Is native support for post-quantum primitives available in the latest version of pyca/cryptography?",
+    "chunk_id": "library_migration_notes.md#1"
+  },
+  {
+    "question": "What alternative libraries or methods can be used to bridge the gap until native support lands?",
+    "chunk_id": "library_migration_notes.md#1"
+  },
+  {
+    "question": "What specific cryptographic primitives does PyNaCl / libsodium use for key exchange?",
+    "chunk_id": "library_migration_notes.md#2"
+  },
+  {
+    "question": "Is Ed25519 used by PyNaCl / libsodium for any purpose other than signature generation?",
+    "chunk_id": "library_migration_notes.md#2"
+  },
+  {
+    "question": "Which problem is the basis for both Ed25519 and Curve25519 in the context of PyNaCl / libsodium?",
+    "chunk_id": "library_migration_notes.md#2"
+  },
+  {
+    "question": "What type of attack can break Ed25519 and Curve25519, according to this passage?",
+    "chunk_id": "library_migration_notes.md#2"
+  },
+  {
+    "question": "Why are Ed25519 signatures and Curve25519 key exchange considered insecure in PyNaCl / libsodium?",
+    "chunk_id": "library_migration_notes.md#2"
+  },
+  {
+    "question": "What is being recommended as a replacement for the current Ed25519 signature scheme?",
+    "chunk_id": "library_migration_notes.md#2"
+  },
+  {
+    "question": "What types of SSH key pairs in paramiko are vulnerable to quantum attacks?",
+    "chunk_id": "library_migration_notes.md#3"
+  },
+  {
+    "question": "How can the security of SSH transport be ensured against quantum threats?",
+    "chunk_id": "library_migration_notes.md#3"
+  },
+  {
+    "question": "Are Ed25519Key and RSAKey considered secure for post-quantum cryptography?",
+    "chunk_id": "library_migration_notes.md#3"
+  },
+  {
+    "question": "What is the recommended hybrid key exchange for OpenSSH to protect session confidentiality?",
+    "chunk_id": "library_migration_notes.md#3"
+  },
+  {
+    "question": "Does paramiko support any post-quantum SSH signature keys?",
+    "chunk_id": "library_migration_notes.md#3"
+  },
+  {
+    "question": "What types of SSH keys are still in a state of 'maturation' regarding post-quantum security?",
+    "chunk_id": "library_migration_notes.md#3"
+  },
+  {
+    "question": "What signature schemes does PyJWT use that are vulnerable to Shor's algorithm?",
+    "chunk_id": "library_migration_notes.md#4"
+  },
+  {
+    "question": "How many types of tokens can be signed with RSA, ECDSA, or EdDSA in JOSE/COSE?",
+    "chunk_id": "library_migration_notes.md#4"
+  },
+  {
+    "question": "Which post-quantum algorithms have been registered for JOSE/COSE but not yet standardized?",
+    "chunk_id": "library_migration_notes.md#4"
+  },
+  {
+    "question": "Why should token lifetimes be reduced when using certain signature schemes in PyJWT?",
+    "chunk_id": "library_migration_notes.md#4"
+  },
+  {
+    "question": "What is the recommended approach to migrating from vulnerable signature schemes to more secure ones in PyJWT?",
+    "chunk_id": "library_migration_notes.md#4"
+  },
+  {
+    "question": "How can the migration process be made less disruptive according to the passage?",
+    "chunk_id": "library_migration_notes.md#4"
+  },
+  {
+    "question": "What type of key pair can be generated by `crypto.PKey().generate_key()`?",
+    "chunk_id": "library_migration_notes.md#5"
+  },
+  {
+    "question": "How should certificate signatures be migrated according to this passage?",
+    "chunk_id": "library_migration_notes.md#5"
+  },
+  {
+    "question": "What is the recommended provider for migrating certificate signatures in OpenSSL 3.x?",
+    "chunk_id": "library_migration_notes.md#5"
+  },
+  {
+    "question": "Is it possible to create hybrid certificates using the methods described here?",
+    "chunk_id": "library_migration_notes.md#5"
+  },
+  {
+    "question": "What standardization process is currently underway for composite/hybrid certificates?",
+    "chunk_id": "library_migration_notes.md#5"
+  },
+  {
+    "question": "Can long-lived roots use SLH-DSA instead of ML-DSA?",
+    "chunk_id": "library_migration_notes.md#5"
+  },
+  {
+    "question": "What types of keys are generated by `RSA.generate(bits)`, `DSA.generate(bits)` and `ECC.generate(curve=...)` in pycryptodome?",
+    "chunk_id": "library_migration_notes.md#6"
+  },
+  {
+    "question": "How can RSA/DSA/ECDSA signatures be made post-quantum secure using pycryptodome?",
+    "chunk_id": "library_migration_notes.md#6"
+  },
+  {
+    "question": "Is there a built-in way to generate post-quantum keys with the pycryptodome library?",
+    "chunk_id": "library_migration_notes.md#6"
+  },
+  {
+    "question": "What is the recommended approach for migrating from quantum-vulnerable keys in pycryptodome?",
+    "chunk_id": "library_migration_notes.md#6"
+  },
+  {
+    "question": "Can pycryptodome be used directly for generating post-quantum cryptographic primitives?",
+    "chunk_id": "library_migration_notes.md#6"
+  },
+  {
+    "question": "How does liboqs assist in making pycryptodome's cryptography post-quantum secure?",
+    "chunk_id": "library_migration_notes.md#6"
+  },
+  {
+    "question": "What date did NIST publish its first three post-quantum cryptography standards?",
+    "chunk_id": "nist_standards.md#0"
+  },
+  {
+    "question": "Which organizations are the migration targets for quantum-vulnerable public-key cryptography according to NIST?",
+    "chunk_id": "nist_standards.md#0"
+  },
+  {
+    "question": "What is the purpose of FIPS 203, as mentioned in the passage?",
+    "chunk_id": "nist_standards.md#0"
+  },
+  {
+    "question": "Can you provide a link to the source document for NIST's post-quantum cryptography standard FIPS 204?",
+    "chunk_id": "nist_standards.md#0"
+  },
+  {
+    "question": "How many post-quantum cryptography standards were finalized by NIST on August 13, 2024?",
+    "chunk_id": "nist_standards.md#0"
+  },
+  {
+    "question": "What is the name of the NIST project focused on developing and implementing post-quantum cryptography?",
+    "chunk_id": "nist_standards.md#0"
+  },
+  {
+    "question": "What is the primary standard for key establishment/key exchange?",
+    "chunk_id": "nist_standards.md#1"
+  },
+  {
+    "question": "Which cryptographic schemes does FIPS 203's ML-KEM replace?",
+    "chunk_id": "nist_standards.md#1"
+  },
+  {
+    "question": "What are the recommended parameter sets for ML-KEM?",
+    "chunk_id": "nist_standards.md#1"
+  },
+  {
+    "question": "Is RSA key transport vulnerable to quantum attacks?",
+    "chunk_id": "nist_standards.md#1"
+  },
+  {
+    "question": "How can organizations approach a transition from classical to post-quantum cryptography?",
+    "chunk_id": "nist_standards.md#1"
+  },
+  {
+    "question": "What is the default parameter set recommended for ML-KEM?",
+    "chunk_id": "nist_standards.md#1"
+  },
+  {
+    "question": "What is the primary standard for digital signatures in post-quantum cryptography?",
+    "chunk_id": "nist_standards.md#2"
+  },
+  {
+    "question": "Which signature schemes are vulnerable to quantum attacks and replaced by ML-DSA?",
+    "chunk_id": "nist_standards.md#2"
+  },
+  {
+    "question": "What are the recommended parameter sets for ML-DSA?",
+    "chunk_id": "nist_standards.md#2"
+  },
+  {
+    "question": "In what contexts should ML-DSA be used as a default choice?",
+    "chunk_id": "nist_standards.md#2"
+  },
+  {
+    "question": "What type of cryptographic algorithm is CRYSTALS-Dilithium?",
+    "chunk_id": "nist_standards.md#2"
+  },
+  {
+    "question": "Is Ed25519/Ed448 still considered secure in post-quantum cryptography?",
+    "chunk_id": "nist_standards.md#2"
+  },
+  {
+    "question": "What type of signature standard is SLH-DSA?",
+    "chunk_id": "nist_standards.md#3"
+  },
+  {
+    "question": "Is the security of SLH-DSA based on lattice assumptions?",
+    "chunk_id": "nist_standards.md#3"
+  },
+  {
+    "question": "How does SLH-DSA compare to ML-DSA in terms of speed?",
+    "chunk_id": "nist_standards.md#3"
+  },
+  {
+    "question": "What are some scenarios where SLH-DSA might be preferred over other options?",
+    "chunk_id": "nist_standards.md#3"
+  },
+  {
+    "question": "Can SLH-DSA be used as a general-purpose digital signature scheme?",
+    "chunk_id": "nist_standards.md#3"
+  },
+  {
+    "question": "Does FIPS 205 specify any specific requirements for the use of SLH-DSA?",
+    "chunk_id": "nist_standards.md#3"
+  },
+  {
+    "question": "What symmetric ciphers remain secure against Shor's algorithm?",
+    "chunk_id": "nist_standards.md#4"
+  },
+  {
+    "question": "How does Grover's algorithm impact the security of hash functions?",
+    "chunk_id": "nist_standards.md#4"
+  },
+  {
+    "question": "What is the recommended key size to protect against a quadratic speedup attack?",
+    "chunk_id": "nist_standards.md#4"
+  },
+  {
+    "question": "Which SHA-1 variant should be used instead for collision resistance?",
+    "chunk_id": "nist_standards.md#4"
+  },
+  {
+    "question": "Is AES-128 considered secure in a post-quantum world?",
+    "chunk_id": "nist_standards.md#4"
+  },
+  {
+    "question": "What is the minimum digest length required for SHA3 to be considered secure?",
+    "chunk_id": "nist_standards.md#4"
+  },
+  {
+    "question": "What is the purpose of mapping quantum-vulnerable primitives to NIST post-quantum targets?",
+    "chunk_id": "primitive_mapping.md#0"
+  },
+  {
+    "question": "How do usage contexts influence the selection of a post-quantum target for each primitive?",
+    "chunk_id": "primitive_mapping.md#0"
+  },
+  {
+    "question": "Which specific standards from NIST and NSA provide guidance on this mapping process?",
+    "chunk_id": "primitive_mapping.md#0"
+  },
+  {
+    "question": "Are there any differences in how to map primitives based on their intended use cases?",
+    "chunk_id": "primitive_mapping.md#0"
+  },
+  {
+    "question": "Can you explain why it's essential to consider the usage context when migrating to post-quantum cryptography?",
+    "chunk_id": "primitive_mapping.md#0"
+  },
+  {
+    "question": "What are some of the key considerations for selecting a suitable post-quantum target for each primitive?",
+    "chunk_id": "primitive_mapping.md#0"
+  },
+  {
+    "question": "What post-quantum cryptography primitives are vulnerable to Shor's algorithm?",
+    "chunk_id": "primitive_mapping.md#1"
+  },
+  {
+    "question": "Which key exchange methods must migrate from RSA-based to ML-KEM-based for security?",
+    "chunk_id": "primitive_mapping.md#1"
+  },
+  {
+    "question": "How can a hybrid KEM be used during the transition period?",
+    "chunk_id": "primitive_mapping.md#1"
+  },
+  {
+    "question": "What is the recommended minimum key size for ML-KEM in FIPS 203?",
+    "chunk_id": "primitive_mapping.md#1"
+  },
+  {
+    "question": "Can elliptic-curve Diffie-Hellman (ECDH) keys be safely used with Shor's algorithm?",
+    "chunk_id": "primitive_mapping.md#1"
+  },
+  {
+    "question": "What is the benefit of deploying a hybrid KEM for key establishment?",
+    "chunk_id": "primitive_mapping.md#1"
+  },
+  {
+    "question": "What cryptographic primitives require replacement in post-quantum cryptography?",
+    "chunk_id": "primitive_mapping.md#2"
+  },
+  {
+    "question": "Which digital signature schemes are vulnerable to Shor's algorithm?",
+    "chunk_id": "primitive_mapping.md#2"
+  },
+  {
+    "question": "What is the recommended migration path for RSA signatures in a post-quantum setting?",
+    "chunk_id": "primitive_mapping.md#2"
+  },
+  {
+    "question": "Are there any signature schemes that can be replaced with SLH-DSA without compromising security?",
+    "chunk_id": "primitive_mapping.md#2"
+  },
+  {
+    "question": "How do Ed25519 and Ed448 differ from other ECDSA variants in terms of post-quantum resistance?",
+    "chunk_id": "primitive_mapping.md#2"
+  },
+  {
+    "question": "Can long-lived root or firmware keys be securely managed using ML-DSA?",
+    "chunk_id": "primitive_mapping.md#2"
+  },
+  {
+    "question": "What effect does Grover's algorithm have on the security of AES-128?",
+    "chunk_id": "primitive_mapping.md#3"
+  },
+  {
+    "question": "Is using a 256-bit key sufficient to counteract the impact of quantum computing on symmetric encryption?",
+    "chunk_id": "primitive_mapping.md#3"
+  },
+  {
+    "question": "Does increasing the key size from 192 bits to 256 bits improve the security against quantum attacks?",
+    "chunk_id": "primitive_mapping.md#3"
+  },
+  {
+    "question": "How does the transition from AES-128 to AES-256 address the threat posed by Grover's algorithm?",
+    "chunk_id": "primitive_mapping.md#3"
+  },
+  {
+    "question": "Is there a specific threshold for key sizes that determines whether a symmetric encryption scheme is secure against quantum computers?",
+    "chunk_id": "primitive_mapping.md#3"
+  },
+  {
+    "question": "What is the minimum key size required to ensure the security of a symmetric encryption scheme in a post-quantum world?",
+    "chunk_id": "primitive_mapping.md#3"
+  },
+  {
+    "question": "Which specific hash functions should be replaced due to collision vulnerabilities?",
+    "chunk_id": "primitive_mapping.md#4"
+  },
+  {
+    "question": "What is the recommended upgrade path from MD5 and SHA-1 hashing?",
+    "chunk_id": "primitive_mapping.md#4"
+  },
+  {
+    "question": "In what contexts is SHA-256 considered sufficient, but not ideal?",
+    "chunk_id": "primitive_mapping.md#4"
+  },
+  {
+    "question": "What are some alternatives to SHA-256 for long-term or high-assurance applications?",
+    "chunk_id": "primitive_mapping.md#4"
+  },
+  {
+    "question": "Why are SHA-384 and SHA-512 preferred over SHA-256 in certain scenarios?",
+    "chunk_id": "primitive_mapping.md#4"
+  },
+  {
+    "question": "Which hash function has already been compromised due to collision attacks?",
+    "chunk_id": "primitive_mapping.md#4"
+  },
+  {
+    "question": "Are Kyber key encapsulation mechanisms considered post-quantum?",
+    "chunk_id": "primitive_mapping.md#5"
+  },
+  {
+    "question": "What type of cryptographic schemes are Dilithium and SPHINCS+ classified as in the context of quantum computing?",
+    "chunk_id": "primitive_mapping.md#5"
+  },
+  {
+    "question": "Do implementations using ML-KEM, ML-DSA, or SLH-DSA need to be flagged as defects if they are already post-quantum?",
+    "chunk_id": "primitive_mapping.md#5"
+  },
+  {
+    "question": "Can Dilithium be used for digital signatures in a post-quantum setting?",
+    "chunk_id": "primitive_mapping.md#5"
+  },
+  {
+    "question": "How should existing deployments of Kyber and similar schemes be documented in terms of quantum resistance?",
+    "chunk_id": "primitive_mapping.md#5"
+  },
+  {
+    "question": "In what way does the classification of certain cryptographic schemes as 'already post-quantum' impact their reporting in security assessments?",
+    "chunk_id": "primitive_mapping.md#5"
+  },
+  {
+    "question": "What organizations are currently working on standardizing post-quantum cryptography?",
+    "chunk_id": "standards_and_bodies.md#0"
+  },
+  {
+    "question": "Which government agency is leading the effort to develop post-quantum cryptographic standards?",
+    "chunk_id": "standards_and_bodies.md#0"
+  },
+  {
+    "question": "What specific project by NIST is focused on post-quantum cryptography and what are its goals?",
+    "chunk_id": "standards_and_bodies.md#0"
+  },
+  {
+    "question": "Who or what is responsible for developing RFC 9370, a key document in PQC standards?",
+    "chunk_id": "standards_and_bodies.md#0"
+  },
+  {
+    "question": "What is the timeline for the completion of the HQC selection process by NIST?",
+    "chunk_id": "standards_and_bodies.md#0"
+  },
+  {
+    "question": "Which industry consortium is driving the development of quantum-safe cryptographic standards?",
+    "chunk_id": "standards_and_bodies.md#0"
+  },
+  {
+    "question": "What NIST standards were finalized in 2024?",
+    "chunk_id": "standards_and_bodies.md#1"
+  },
+  {
+    "question": "Which key-encapsulation mechanism was selected as a backup by NIST in 2025?",
+    "chunk_id": "standards_and_bodies.md#1"
+  },
+  {
+    "question": "In what year did NIST select HQC as a backup key-encapsulation mechanism?",
+    "chunk_id": "standards_and_bodies.md#1"
+  },
+  {
+    "question": "What type of hardness assumptions does HQC rely on, compared to ML-KEM?",
+    "chunk_id": "standards_and_bodies.md#1"
+  },
+  {
+    "question": "What is the purpose of an 'on-ramp' in the context of post-quantum cryptography standards?",
+    "chunk_id": "standards_and_bodies.md#1"
+  },
+  {
+    "question": "Which type of cryptographic schemes are being standardized through NIST's 'on-ramp' effort?",
+    "chunk_id": "standards_and_bodies.md#1"
+  },
+  {
+    "question": "What IETF working group focuses on integrating post-quantum algorithms into TLS?",
+    "chunk_id": "standards_and_bodies.md#2"
+  },
+  {
+    "question": "Which IETF protocols are currently incorporating post-quantum cryptography?",
+    "chunk_id": "standards_and_bodies.md#2"
+  },
+  {
+    "question": "How does the IETF plan to handle key exchanges in IKEv2 for post-quantum security?",
+    "chunk_id": "standards_and_bodies.md#2"
+  },
+  {
+    "question": "Can you describe the approach used by LAMPS for implementing post-quantum certificates?",
+    "chunk_id": "standards_and_bodies.md#2"
+  },
+  {
+    "question": "What is the typical strategy employed during the transition period from classical to post-quantum cryptography protocols?",
+    "chunk_id": "standards_and_bodies.md#2"
+  },
+  {
+    "question": "Which IETF group is responsible for integrating post-quantum key exchange into IPSECME?",
+    "chunk_id": "standards_and_bodies.md#2"
+  },
+  {
+    "question": "What organizations are involved in publishing guidance on post-quantum cryptography?",
+    "chunk_id": "standards_and_bodies.md#3"
+  },
+  {
+    "question": "Which standards body is also standardizing post-quantum mechanisms alongside ETSI?",
+    "chunk_id": "standards_and_bodies.md#3"
+  },
+  {
+    "question": "What type of frameworks are being standardized by ISO/IEC working groups?",
+    "chunk_id": "standards_and_bodies.md#3"
+  },
+  {
+    "question": "Are the efforts of NIST complementary to those of ETSI and ISO/IEC?",
+    "chunk_id": "standards_and_bodies.md#3"
+  },
+  {
+    "question": "What specific area of quantum-safe cryptography is ETSI's group focused on?",
+    "chunk_id": "standards_and_bodies.md#3"
+  },
+  {
+    "question": "Is there a migration framework being developed by ETSI and ISO/IEC that is not related to NIST?",
+    "chunk_id": "standards_and_bodies.md#3"
+  },
+  {
+    "question": "What are the two primary factors used to prioritize migration in a common framework?",
+    "chunk_id": "standards_and_bodies.md#4"
+  },
+  {
+    "question": "In what order do long-lived-secret systems typically migrate compared to short-lived ones?",
+    "chunk_id": "standards_and_bodies.md#4"
+  },
+  {
+    "question": "Which cryptographic primitives are generally migrated first due to 'harvest-now-decrypt-later' concerns?",
+    "chunk_id": "standards_and_bodies.md#4"
+  },
+  {
+    "question": "How does system exposure impact the prioritization of migration in this framework?",
+    "chunk_id": "standards_and_bodies.md#4"
+  },
+  {
+    "question": "What is the typical relationship between ML-KEM and ML-DSA in terms of migration order?",
+    "chunk_id": "standards_and_bodies.md#4"
+  },
+  {
+    "question": "Why do long-lived-secret systems have a different migration priority than short-lived ones?",
+    "chunk_id": "standards_and_bodies.md#4"
+  },
+  {
+    "question": "What regulatory deadlines drive the priority for post-quantum cryptography migration?",
+    "chunk_id": "timelines_compliance.md#0"
+  },
+  {
+    "question": "Are there specific dates mentioned in public guidance on PQC migration?",
+    "chunk_id": "timelines_compliance.md#0"
+  },
+  {
+    "question": "How should one verify the accuracy of the provided timeline against primary sources?",
+    "chunk_id": "timelines_compliance.md#0"
+  },
+  {
+    "question": "Which government agencies provide guidance on migrating to post-quantum cryptography?",
+    "chunk_id": "timelines_compliance.md#0"
+  },
+  {
+    "question": "Is there a single, unified global regulatory deadline for PQC migration?",
+    "chunk_id": "timelines_compliance.md#0"
+  },
+  {
+    "question": "What is the source of the approximate timeline for post-quantum cryptography migration deadlines?",
+    "chunk_id": "timelines_compliance.md#0"
+  },
+  {
+    "question": "What is the name of the US government's commercial national security algorithm suite?",
+    "chunk_id": "timelines_compliance.md#1"
+  },
+  {
+    "question": "By what year does the NSA expect broad adoption of CNSA 2.0 algorithms across various systems?",
+    "chunk_id": "timelines_compliance.md#1"
+  },
+  {
+    "question": "Which post-quantum algorithms are specified for use in software/firmware signing by the CNSA 2.0?",
+    "chunk_id": "timelines_compliance.md#1"
+  },
+  {
+    "question": "What is the target date for exclusive use of post-quantum algorithms in many classes of systems?",
+    "chunk_id": "timelines_compliance.md#1"
+  },
+  {
+    "question": "Where can one find more information about the Commercial National Security Algorithm Suite 2.0?",
+    "chunk_id": "timelines_compliance.md#1"
+  },
+  {
+    "question": "What is the expected timeline for transitioning to post-quantum algorithms in national security systems?",
+    "chunk_id": "timelines_compliance.md#1"
+  },
+  {
+    "question": "What is the current US government directive regarding post-quantum cryptography?",
+    "chunk_id": "timelines_compliance.md#2"
+  },
+  {
+    "question": "How does NIST assist federal agencies in migrating to post-quantum cryptography?",
+    "chunk_id": "timelines_compliance.md#2"
+  },
+  {
+    "question": "What is the recommended first step for federal agencies to prepare for post-quantum migration?",
+    "chunk_id": "timelines_compliance.md#2"
+  },
+  {
+    "question": "What document outlines practical playbooks for migrating to post-quantum cryptography?",
+    "chunk_id": "timelines_compliance.md#2"
+  },
+  {
+    "question": "Why is building a cryptographic inventory (CBOM) considered essential by NIST?",
+    "chunk_id": "timelines_compliance.md#2"
+  },
+  {
+    "question": "What is the specific OMB memorandum that requires US federal agency action on post-quantum cryptography?",
+    "chunk_id": "timelines_compliance.md#2"
+  },
+  {
+    "question": "What is the European Union's coordinated roadmap for post-quantum cryptography?",
+    "chunk_id": "timelines_compliance.md#3"
+  },
+  {
+    "question": "Which country recommends a phased approach to transitioning to PQC?",
+    "chunk_id": "timelines_compliance.md#3"
+  },
+  {
+    "question": "When does the EU aim to complete high-risk use case migrations?",
+    "chunk_id": "timelines_compliance.md#3"
+  },
+  {
+    "question": "How does Germany plan to handle systems vulnerable to 'harvest-now, decrypt-later' attacks during the transition period?",
+    "chunk_id": "timelines_compliance.md#3"
+  },
+  {
+    "question": "What is the recommended strategy for transitioning to post-quantum cryptography in France?",
+    "chunk_id": "timelines_compliance.md#3"
+  },
+  {
+    "question": "By what year does the EU target broad migration of all systems to PQC?",
+    "chunk_id": "timelines_compliance.md#3"
+  },
+  {
+    "question": "What type of data is at risk from being decrypted by a future quantum computer?",
+    "chunk_id": "timelines_compliance.md#4"
+  },
+  {
+    "question": "Can adversaries decrypt captured encrypted traffic now, or only in the future?",
+    "chunk_id": "timelines_compliance.md#4"
+  },
+  {
+    "question": "Why is long-lived credential security a concern for post-quantum cryptography?",
+    "chunk_id": "timelines_compliance.md#4"
+  },
+  {
+    "question": "How does the existence of a quantum computer affect the confidentiality of certain types of data?",
+    "chunk_id": "timelines_compliance.md#4"
+  },
+  {
+    "question": "What is one reason why key establishment migration (ML-KEM) might be prioritized over signatures?",
+    "chunk_id": "timelines_compliance.md#4"
+  },
+  {
+    "question": "Can encrypted traffic captured today be decrypted in the future, even if it was encrypted securely?",
+    "chunk_id": "timelines_compliance.md#4"
+  },
+  {
+    "question": "What IETF draft proposes a hybrid key exchange for TLS?",
+    "chunk_id": "tls_and_protocols.md#0"
+  },
+  {
+    "question": "How do post-quantum algorithms integrate with existing quantum-vulnerable cryptography in IPsec?",
+    "chunk_id": "tls_and_protocols.md#0"
+  },
+  {
+    "question": "Which RFC document provides guidance on incorporating post-quantum cryptography into protocols like PKI?",
+    "chunk_id": "tls_and_protocols.md#0"
+  },
+  {
+    "question": "In what release notes can one find information about OpenSSH's support for post-quantum migration?",
+    "chunk_id": "tls_and_protocols.md#0"
+  },
+  {
+    "question": "What is the name of the draft that outlines a hybrid key exchange mechanism for TLS?",
+    "chunk_id": "tls_and_protocols.md#0"
+  },
+  {
+    "question": "How do OpenSSL's release notes address the transition to post-quantum cryptography in their software?",
+    "chunk_id": "tls_and_protocols.md#0"
+  },
+  {
+    "question": "What key exchange algorithm combines X25519 with ML-KEM-768?",
+    "chunk_id": "tls_and_protocols.md#1"
+  },
+  {
+    "question": "Which hybrid group is used for protecting session keys against harvest-now-decrypt-later attacks?",
+    "chunk_id": "tls_and_protocols.md#1"
+  },
+  {
+    "question": "Is the hybrid group X25519MLKEM768 supported in OpenSSL 3.5 and later versions?",
+    "chunk_id": "tls_and_protocols.md#1"
+  },
+  {
+    "question": "How does the TLS key exchange using X25519MLKEM768 handle authentication?",
+    "chunk_id": "tls_and_protocols.md#1"
+  },
+  {
+    "question": "What browsers have deployed the X25519MLKEM768 hybrid group for TLS key exchange?",
+    "chunk_id": "tls_and_protocols.md#1"
+  },
+  {
+    "question": "Which cryptographic library, besides OpenSSL, supports the X25519MLKEM768 hybrid group?",
+    "chunk_id": "tls_and_protocols.md#1"
+  },
+  {
+    "question": "What is the default post-quantum key exchange method used by OpenSSH?",
+    "chunk_id": "tls_and_protocols.md#2"
+  },
+  {
+    "question": "Which two hybrid post-quantum key exchange methods are available in OpenSSH?",
+    "chunk_id": "tls_and_protocols.md#2"
+  },
+  {
+    "question": "How do the new post-quantum key exchanges protect SSH sessions?",
+    "chunk_id": "tls_and_protocols.md#2"
+  },
+  {
+    "question": "When was the `mlkem768x25519-sha256` method added to OpenSSH?",
+    "chunk_id": "tls_and_protocols.md#2"
+  },
+  {
+    "question": "What type of keys remain classical until further notice in an OpenSSH session?",
+    "chunk_id": "tls_and_protocols.md#2"
+  },
+  {
+    "question": "Are there any plans for standardized post-quantum signatures for host and user keys?",
+    "chunk_id": "tls_and_protocols.md#2"
+  },
+  {
+    "question": "What RFC document allows multiple key exchanges in IKEv2?",
+    "chunk_id": "tls_and_protocols.md#3"
+  },
+  {
+    "question": "How does IKEv2 negotiate additional key exchanges beyond the first?",
+    "chunk_id": "tls_and_protocols.md#3"
+  },
+  {
+    "question": "Can IKEv2 use multiple types of key exchange simultaneously?",
+    "chunk_id": "tls_and_protocols.md#3"
+  },
+  {
+    "question": "Is there a way to add an ML-KEM exchange to an existing IKEv2 connection?",
+    "chunk_id": "tls_and_protocols.md#3"
+  },
+  {
+    "question": "What is the name of the protocol that can be used alongside classical key exchange in IPsec?",
+    "chunk_id": "tls_and_protocols.md#3"
+  },
+  {
+    "question": "How does using an ML-KEM exchange in IKEv2 affect the security of an IPsec tunnel?",
+    "chunk_id": "tls_and_protocols.md#3"
+  },
+  {
+    "question": "What cryptographic algorithms used in X.509/PKI certificates will be vulnerable to Shor's algorithm?",
+    "chunk_id": "tls_and_protocols.md#4"
+  },
+  {
+    "question": "How do post-quantum cryptography techniques address the security of code-signing keys?",
+    "chunk_id": "tls_and_protocols.md#4"
+  },
+  {
+    "question": "Are RSA and ECDSA signatures suitable for long-term use in certificate authority hierarchies?",
+    "chunk_id": "tls_and_protocols.md#4"
+  },
+  {
+    "question": "What type of key migration is recommended for certificate authorities due to quantum computing threats?",
+    "chunk_id": "tls_and_protocols.md#4"
+  },
+  {
+    "question": "In what context are hash-based assumptions considered acceptable for cryptographic protocols?",
+    "chunk_id": "tls_and_protocols.md#4"
+  },
+  {
+    "question": "What working group is standardizing new formats for composite and hybrid certificates?",
+    "chunk_id": "tls_and_protocols.md#4"
+  },
+  {
+    "question": "What cryptographic algorithms is S/MIME currently based on?",
+    "chunk_id": "tls_and_protocols.md#5"
+  },
+  {
+    "question": "Will RSA be replaced in S/MIME by a post-quantum alternative?",
+    "chunk_id": "tls_and_protocols.md#5"
+  },
+  {
+    "question": "How will ECDSA signatures change in secure email protocols?",
+    "chunk_id": "tls_and_protocols.md#5"
+  },
+  {
+    "question": "Is ECDH key exchange being phased out in favor of something else?",
+    "chunk_id": "tls_and_protocols.md#5"
+  },
+  {
+    "question": "What specific identifiers are standardized for ML-DSA and ML-KEM in CMS/algorithm lists?",
+    "chunk_id": "tls_and_protocols.md#5"
+  },
+  {
+    "question": "Will the transition to post-quantum cryptography affect S/MIME's encryption capabilities?",
+    "chunk_id": "tls_and_protocols.md#5"
+  }
 ]

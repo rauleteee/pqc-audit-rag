@@ -77,23 +77,23 @@ pytest -q
 Four retrieval strategies are evaluated against a ground-truth question set
 (`evaluation/ground_truth.json`) with **Hit Rate** and **MRR**; the best is wired
 as the default. Reproduce with `python evaluation/evaluate_retrieval.py` (writes
-`evaluation/RESULTS.md`). Latest run (48 questions over a 45-chunk corpus, k=4,
-ONNX embeddings):
+`evaluation/RESULTS.md`). Latest run (**269 LLM-generated questions** over a
+45-chunk corpus, k=4, ONNX embeddings):
 
 | Method | Hit Rate | MRR |
 |---|---|---|
-| dense (vector) | 0.938 | 0.835 |
-| text (minsearch) | 0.958 | 0.776 |
-| **hybrid (RRF) — best** | 0.938 | **0.861** |
-| hybrid + rerank | 0.958 | 0.807 |
+| dense (vector) | 0.822 | 0.686 |
+| text (minsearch) | 0.758 | 0.595 |
+| hybrid (RRF) | 0.840 | 0.679 |
+| **hybrid + rerank — best** | **0.870** | **0.704** |
 
-**MRR** is the primary metric (ranking quality); Hit Rate is near-saturated and
-differs by ~1 question. By MRR, hybrid search (Reciprocal Rank Fusion of dense +
-keyword) wins and beats either method alone. The lexical re-ranking stage was also
-evaluated but did *not* improve ranking on this corpus (0.807 < 0.861), so plain
-hybrid is the default — an honest, measured result. Both best practices (hybrid +
-re-ranking) are implemented in `search.py`; `PQC_RAG_RETRIEVAL` / the UI selector
-let you switch strategy.
+The ground truth is generated with the LLM (`evaluation/generate_ground_truth.py`,
+~6 questions/chunk), the course-aligned approach. **MRR** is the primary metric
+(ranking quality). On this larger, more diverse set the full pipeline —
+hybrid search (Reciprocal Rank Fusion of dense + keyword) **plus** a re-ranking
+stage — wins on both metrics, and the re-ranker clearly helps (0.704 > 0.679).
+Both best practices (hybrid + re-ranking) are implemented in `search.py`;
+`PQC_RAG_RETRIEVAL` / the UI selector let you switch strategy.
 
 ## Evaluation criteria map (LLM Zoomcamp)
 
@@ -122,7 +122,8 @@ relevant code quickly.
 2. ✅ Automated ingestion pipeline (chunking + embeddings + persistent LanceDB;
    plus a dlt→DuckDB pipeline, course-aligned).
 3. ✅ Retrieval evaluation (dense vs text vs hybrid/RRF vs re-ranking; Hit
-   Rate/MRR over a 45-chunk corpus, 48 questions). Winner (hybrid/RRF) is default.
+   Rate/MRR over a 45-chunk corpus, 269 LLM-generated questions). Winner
+   (hybrid + rerank) is the default.
 4. ⏳ LLM evaluation (multiple prompts + LLM-as-judge) + query rewriting.
 5. ✅ Streamlit UI + user feedback.
 6. ⏳ Monitoring (Postgres + Grafana, ≥5 charts).

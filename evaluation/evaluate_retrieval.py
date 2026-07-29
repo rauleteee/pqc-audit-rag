@@ -66,9 +66,8 @@ def main() -> None:
     footer = (
         f"\n**Winner (by MRR): {best}** — wired as the default retrieval method.\n\n"
         "Hit Rate = fraction of questions whose relevant chunk is in the top-k. "
-        "MRR = mean reciprocal rank of the relevant chunk. MRR is the primary "
-        "metric here (ranking quality); Hit Rate is near-saturated and only breaks "
-        "ties.\n"
+        "MRR = mean reciprocal rank of the relevant chunk (primary metric: ranking "
+        "quality). Ground truth is LLM-generated (see generate_ground_truth.py).\n"
     )
     RESULTS.write_text(header + body + footer, encoding="utf-8")
 

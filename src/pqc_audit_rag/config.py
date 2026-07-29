@@ -26,6 +26,8 @@ class Settings:
     )
     llm_api_key: str = os.environ.get("OPENAI_API_KEY", "ollama")
     llm_model: str = os.environ.get("PQC_RAG_LLM", "llama3.1")
+    # Cap synthesis output length to keep generation fast on modest hardware.
+    llm_max_tokens: int = int(os.environ.get("PQC_RAG_MAX_TOKENS", "300"))
 
     # Embeddings: a local ONNX model directory (tokenizer.json + model.onnx).
     embed_model: str = os.environ.get("PQC_RAG_EMBED", "Xenova/all-MiniLM-L6-v2")

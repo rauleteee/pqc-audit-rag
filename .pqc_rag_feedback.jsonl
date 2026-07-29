@@ -1,0 +1,1 @@
+{"ts": 1785328475.0154648, "scanned_path": "examples/vulnerable_sample.py", "verdict": "quantum-critical cryptography in use \u2014 migration needed", "counts": {"CRITICAL": 5, "MEDIUM": 1, "INFO": 0, "total": 6}, "generated_by": "fake", "recommendations": 6, "rating": "up"}

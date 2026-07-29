@@ -112,11 +112,13 @@ class LLMSynthesizer:
         base_url: str | None = None,
         api_key: str | None = None,
         prompt_style: str | None = None,
+        max_tokens: int | None = None,
     ) -> None:
         self.model = model or settings.llm_model
         self.base_url = base_url or settings.llm_base_url
         self.api_key = api_key or settings.llm_api_key
         self.prompt_style = prompt_style or settings.synthesis_prompt
+        self.max_tokens = max_tokens or settings.llm_max_tokens
         # Token usage captured per call, kept for the monitoring phase.
         self.usages: list[Any] = []
 
@@ -151,6 +153,7 @@ class LLMSynthesizer:
             ],
             response_format={"type": "json_object"},
             temperature=0,
+            max_tokens=self.max_tokens,
         )
         self.usages.append(getattr(response, "usage", None))
         data = json.loads(response.choices[0].message.content or "{}")

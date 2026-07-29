@@ -111,26 +111,50 @@ The LLM only synthesizes prose; the control flow is deterministic code.
 
 ## Quickstart
 
+Prerequisites: **Python 3.12** (via [uv](https://docs.astral.sh/uv/)) and
+**[Ollama](https://ollama.com)** for the local LLM.
+
 ```bash
+# 1. Install Ollama (the local, free LLM runtime) and pull a model.
+#    The installer starts the ollama service on http://localhost:11434.
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.1            # good quality; or a lighter/faster model on CPU:
+# ollama pull llama3.2:3b
+
+# 2. Python environment.
 uv venv --python 3.12 && source .venv/bin/activate
 uv pip install -e ".[dev,local-embed,vector,llm]"
 
-# 1. Build the vector index from the curated corpus
-python -m pqc_audit_rag.knowledge_base.ingest
+# 3. Download the local ONNX embedding model (once, ~90 MB).
+python -m pqc_audit_rag.knowledge_base.download_model
 
-# 2. Pull a local model (once) and run an audit
-ollama pull llama3.1
+# 4a. Launch the web UI — pick a bundled example or point it at your own project.
+streamlit run app/streamlit_app.py        # http://localhost:8501
+
+# 4b. ...or use the CLI.
 pqc-audit-rag audit ./path/to/project --md
-
-# ...or launch the web UI to try it on a real project
-streamlit run app/streamlit_app.py
 ```
 
-The UI mirrors the pqc-scanner report style (verdict banner, severity chips,
-per-exposure cards with cited migration guidance) and collects 👍/👎 feedback.
-Use **Offline mode** in the sidebar to try it without a running LLM.
+The UI has an **example picker** (several scenarios: SSH, JWT-style, messaging,
+already-post-quantum) plus a custom path, a verdict banner, severity chips,
+per-exposure cards with cited migration guidance, live progress, and 👍/👎
+feedback. **Offline mode** in the sidebar runs everything except the LLM (instant,
+no Ollama needed).
 
-Run the tests (no Ollama / no torch needed — uses the offline fallbacks):
+**On modest / CPU-only hardware** LLM synthesis is slow (a few seconds per
+finding). Use a smaller model and cap the output:
+
+```bash
+PQC_RAG_LLM=llama3.2:3b PQC_RAG_MAX_TOKENS=280 streamlit run app/streamlit_app.py
+```
+
+Key environment variables: `OPENAI_BASE_URL` (default `http://localhost:11434/v1`),
+`OPENAI_API_KEY` (default `ollama`), `PQC_RAG_LLM`, `PQC_RAG_MAX_TOKENS`,
+`PQC_RAG_RETRIEVAL` (dense|text|hybrid|rerank), `PQC_RAG_PROMPT`, `PQC_RAG_TOPK`.
+Any OpenAI-compatible endpoint works (e.g. a free hosted tier) by setting the
+first three.
+
+Run the tests (no Ollama / no ONNX / no network — uses offline fallbacks):
 
 ```bash
 uv pip install -e ".[dev]"

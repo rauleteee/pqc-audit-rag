@@ -6,6 +6,7 @@ from pqc_audit_rag.search import (
     HybridRetriever,
     RerankRetriever,
     TextRetriever,
+    heuristic_rewrite,
     make_retriever,
 )
 
@@ -47,3 +48,16 @@ def test_make_retriever_rejects_unknown():
 
     with pytest.raises(ValueError):
         make_retriever("nonsense", embedder=HashingEmbedder())
+
+
+def test_heuristic_rewrite_expands_acronyms():
+    out = heuristic_rewrite("How to migrate RSA and ECDH keys?")
+    assert "Rivest-Shamir-Adleman" in out
+    assert "Diffie-Hellman" in out
+    # No known acronym -> query unchanged.
+    assert heuristic_rewrite("hello world") == "hello world"
+
+
+def test_make_retriever_rewrite_builds():
+    retriever = make_retriever("rewrite", embedder=HashingEmbedder())
+    assert retriever.retrieve("migrate RSA to post-quantum", top_k=2)

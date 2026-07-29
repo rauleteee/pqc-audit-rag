@@ -38,6 +38,9 @@ class Settings:
     # Default retrieval strategy (dense|text|hybrid|rerank). The evaluation
     # (evaluation/evaluate_retrieval.py) picks "rerank" as the best.
     retrieval_method: str = os.environ.get("PQC_RAG_RETRIEVAL", "rerank")
+    # Synthesis prompt style (concise|detailed|checklist). The LLM evaluation
+    # (evaluation/evaluate_llm.py) picks the best.
+    synthesis_prompt: str = os.environ.get("PQC_RAG_PROMPT", "concise")
 
 
 settings = Settings()

@@ -8,6 +8,7 @@ Ground-truth questions: **269** · k = **4** · embedder: **OnnxEmbedder**
 | text (minsearch) | 0.758 | 0.595 |
 | hybrid (RRF) | 0.840 | 0.679 |
 | hybrid + rerank **(best)** | 0.870 | 0.704 |
+| rewrite + rerank | 0.877 | 0.695 |
 
 **Winner (by MRR): hybrid + rerank** — wired as the default retrieval method.
 

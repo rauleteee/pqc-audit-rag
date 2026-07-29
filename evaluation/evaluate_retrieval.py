@@ -19,7 +19,12 @@ from pqc_audit_rag.knowledge_base.ingest import build_index, load_corpus
 from pqc_audit_rag.knowledge_base.store import InMemoryStore
 from pqc_audit_rag.metrics import evaluate
 from pqc_audit_rag.retrieval import Retriever
-from pqc_audit_rag.search import HybridRetriever, RerankRetriever, TextRetriever
+from pqc_audit_rag.search import (
+    HybridRetriever,
+    QueryRewriteRetriever,
+    RerankRetriever,
+    TextRetriever,
+)
 
 HERE = Path(__file__).parent
 GROUND_TRUTH = HERE / "ground_truth.json"
@@ -34,11 +39,13 @@ def build_retrievers():
     dense = Retriever(store, embedder)
     text = TextRetriever(load_corpus())
     hybrid = HybridRetriever(dense, text)
+    rerank = RerankRetriever(hybrid)
     return {
         "dense (vector)": dense,
         "text (minsearch)": text,
         "hybrid (RRF)": hybrid,
-        "hybrid + rerank": RerankRetriever(hybrid),
+        "hybrid + rerank": rerank,
+        "rewrite + rerank": QueryRewriteRetriever(rerank),
     }, embedder
 
 

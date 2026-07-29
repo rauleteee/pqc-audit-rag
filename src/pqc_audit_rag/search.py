@@ -119,6 +119,83 @@ class RerankRetriever:
         return self.retrieve(build_query(exposure), top_k)
 
 
+# Crypto acronym / term expansions for the deterministic query rewriter.
+_EXPANSIONS = {
+    "rsa": "Rivest-Shamir-Adleman factorization",
+    "ecdh": "elliptic curve Diffie-Hellman key exchange",
+    "ecdsa": "elliptic curve signature",
+    "eddsa": "Edwards-curve signature",
+    "ed25519": "Edwards-curve signature EdDSA",
+    "dsa": "digital signature algorithm",
+    "dh": "Diffie-Hellman key exchange",
+    "aes": "symmetric encryption cipher",
+    "ml-kem": "Kyber key encapsulation FIPS 203",
+    "ml-dsa": "Dilithium signature FIPS 204",
+    "slh-dsa": "SPHINCS hash-based signature FIPS 205",
+    "cbom": "cryptography bill of materials inventory",
+    "tls": "transport layer security",
+    "ssh": "secure shell",
+    "pki": "public key infrastructure certificate",
+    "kem": "key encapsulation mechanism",
+    "cnsa": "NSA Commercial National Security Algorithm suite",
+}
+
+
+def heuristic_rewrite(query: str) -> str:
+    """Expand crypto acronyms found in the query (deterministic, offline)."""
+    lower = query.lower()
+    additions = [expansion for term, expansion in _EXPANSIONS.items() if term in lower]
+    return f"{query} {' '.join(additions)}".strip() if additions else query
+
+
+class LLMQueryRewriter:
+    """Rewrite a query into a better search query using the LLM (optional)."""
+
+    def __init__(self, model: str | None = None) -> None:
+        self.model = model
+
+    def __call__(self, query: str) -> str:
+        from pqc_audit_rag.config import settings
+
+        client = _openai_client()
+        response = client.chat.completions.create(
+            model=self.model or settings.llm_model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Rewrite the user's question into a concise search "
+                    "query of keywords for a post-quantum cryptography knowledge "
+                    "base. Reply with the query only.",
+                },
+                {"role": "user", "content": query},
+            ],
+            temperature=0,
+        )
+        return (response.choices[0].message.content or query).strip() or query
+
+
+def _openai_client():
+    from openai import OpenAI
+
+    from pqc_audit_rag.config import settings
+
+    return OpenAI(base_url=settings.llm_base_url, api_key=settings.llm_api_key)
+
+
+class QueryRewriteRetriever:
+    """Rewrite the query before delegating to a base retriever."""
+
+    def __init__(self, base, rewriter=heuristic_rewrite) -> None:
+        self.base = base
+        self.rewriter = rewriter
+
+    def retrieve(self, query: str, top_k: int = 4) -> list[Passage]:
+        return self.base.retrieve(self.rewriter(query), top_k)
+
+    def for_exposure(self, exposure: Exposure, top_k: int = 4) -> list[Passage]:
+        return self.retrieve(build_query(exposure), top_k)
+
+
 def make_retriever(
     method: str = "hybrid",
     *,
@@ -127,7 +204,7 @@ def make_retriever(
     index_path: str | None = None,
     rebuild: bool = False,
 ):
-    """Build a retriever for ``method`` in {dense, text, hybrid, rerank}."""
+    """Build a retriever for ``method`` in {dense, text, hybrid, rerank, rewrite}."""
     from pqc_audit_rag.knowledge_base.ingest import load_corpus, load_or_build
 
     if store is None or embedder is None:
@@ -142,6 +219,9 @@ def make_retriever(
     hybrid = HybridRetriever(dense, text)
     if method == "hybrid":
         return hybrid
+    rerank = RerankRetriever(hybrid)
     if method == "rerank":
-        return RerankRetriever(hybrid)
+        return rerank
+    if method == "rewrite":
+        return QueryRewriteRetriever(rerank)
     raise ValueError(f"unknown retrieval method: {method!r}")

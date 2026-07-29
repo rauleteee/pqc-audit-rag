@@ -68,13 +68,37 @@ class FakeSynthesizer:
         )
 
 
-_SYSTEM_PROMPT = (
-    "You are a post-quantum cryptography migration assistant. Using ONLY the "
-    "provided context passages, write concise, actionable migration guidance for "
-    "the given cryptographic exposure. Do not invent facts not supported by the "
-    "context. Respond ONLY with a JSON object of the form "
+_JSON_INSTRUCTION = (
+    "Respond ONLY with a JSON object of the form "
     '{"summary": "<one paragraph>", "steps": ["<step>", "..."]}.'
 )
+
+# Alternative synthesis prompt styles, compared in evaluation/evaluate_llm.py.
+SYNTHESIS_STYLES = {
+    "concise": (
+        "You are a post-quantum cryptography migration assistant. Using ONLY the "
+        "provided context passages, write concise, actionable migration guidance "
+        "for the given cryptographic exposure. Do not invent facts not supported "
+        "by the context."
+    ),
+    "detailed": (
+        "You are a senior post-quantum cryptography migration consultant. Using "
+        "ONLY the provided context passages, explain the risk and give thorough, "
+        "step-by-step migration guidance for the exposure, referencing the "
+        "relevant standard where the context supports it. Do not invent facts."
+    ),
+    "checklist": (
+        "You are a post-quantum migration assistant. Using ONLY the provided "
+        "context passages, produce guidance for the exposure as a short summary "
+        "plus a concrete, ordered checklist of migration actions. Do not invent "
+        "facts not supported by the context."
+    ),
+}
+
+
+def _system_prompt(style: str) -> str:
+    base = SYNTHESIS_STYLES.get(style, SYNTHESIS_STYLES["concise"])
+    return f"{base} {_JSON_INSTRUCTION}"
 
 
 class LLMSynthesizer:
@@ -87,10 +111,12 @@ class LLMSynthesizer:
         model: str | None = None,
         base_url: str | None = None,
         api_key: str | None = None,
+        prompt_style: str | None = None,
     ) -> None:
         self.model = model or settings.llm_model
         self.base_url = base_url or settings.llm_base_url
         self.api_key = api_key or settings.llm_api_key
+        self.prompt_style = prompt_style or settings.synthesis_prompt
         # Token usage captured per call, kept for the monitoring phase.
         self.usages: list[Any] = []
 
@@ -120,7 +146,7 @@ class LLMSynthesizer:
         response = self._client().chat.completions.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "system", "content": _system_prompt(self.prompt_style)},
                 {"role": "user", "content": self._user_prompt(exposure, passages)},
             ],
             response_format={"type": "json_object"},

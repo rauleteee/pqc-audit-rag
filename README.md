@@ -32,17 +32,63 @@ a seeded public corpus. See the roadmap below.
 
 ## Architecture
 
-```
-scan(path)              # pqc-audit OSS engine -> [Finding]
-  -> group_exposures()  # group by (library, algorithm, usage)     grouping.py
-  -> Retriever          # embed query, search the corpus (RAG)      retrieval.py
-  -> Synthesizer        # LLM writes a cited MigrationRecommendation synthesis.py
-  -> AuditReport        # pydantic model                            models.py
-  -> to_markdown/html   # shareable report                          report.py
+```mermaid
+flowchart TD
+    proj["📁 Local Python project"]
+
+    subgraph detect["🔍 Detection · pqc-audit OSS engine"]
+        scan["scan() · AST"] --> findings["Findings"]
+        findings --> group["group_exposures()"] --> exp["Exposures"]
+    end
+
+    subgraph kb["📚 Knowledge base"]
+        corpus["Curated corpus<br/>markdown + Sources"] --> ing["Ingest · chunk"]
+        ing --> onnx["ONNX embeddings"] --> vec["Vector store<br/>LanceDB / in-memory"]
+        ing --> kw["Keyword index<br/>minsearch"]
+    end
+
+    subgraph rag["🤖 RAG pipeline"]
+        query["build query<br/>+ rewriting"] --> retr["Retriever<br/>hybrid RRF + rerank"]
+        retr --> pass["Cited passages"]
+        pass --> synth["LLM synthesizer<br/>Ollama · OpenAI-compatible"]
+        synth --> rec["MigrationRecommendation"]
+    end
+
+    subgraph out["📤 Output & interfaces"]
+        report["AuditReport<br/>Markdown / HTML"]
+        cli["CLI"]
+        ui["Streamlit UI"]
+        fb["User feedback · JSONL"]
+    end
+
+    subgraph evalz["🧪 Evaluation"]
+        reval["Retrieval eval<br/>Hit Rate / MRR"]
+        leval["LLM-as-judge<br/>faithfulness / actionability"]
+    end
+
+    proj --> scan
+    exp --> query
+    vec --> retr
+    kw --> retr
+    exp --> synth
+    rec --> report
+    report --> cli
+    report --> ui
+    ui --> fb
+    retr -.-> reval
+    synth -.-> leval
+
+    style detect fill:#e8f0fe,stroke:#1f7ab5,stroke-width:2px
+    style kb fill:#eef7ee,stroke:#2e7d32,stroke-width:2px
+    style rag fill:#fdf0e6,stroke:#c77800,stroke-width:2px
+    style out fill:#f6f6f7,stroke:#888,stroke-width:2px
+    style evalz fill:#f3eef9,stroke:#7a4fb5,stroke-width:2px
 ```
 
 The **detection is not reimplemented** — this app consumes `pqc-audit` as a
 library. This layer adds the migration knowledge (RAG), orchestration and report.
+Dependencies point inward (interfaces → RAG → knowledge base / engine); the LLM
+only synthesizes prose, the control flow is deterministic code.
 
 ## Quickstart
 
@@ -85,15 +131,17 @@ as the default. Reproduce with `python evaluation/evaluate_retrieval.py` (writes
 | dense (vector) | 0.822 | 0.686 |
 | text (minsearch) | 0.758 | 0.595 |
 | hybrid (RRF) | 0.840 | 0.679 |
-| **hybrid + rerank — best** | **0.870** | **0.704** |
+| **hybrid + rerank — best (MRR)** | 0.870 | **0.704** |
+| rewrite + rerank | **0.877** | 0.695 |
 
 The ground truth is generated with the LLM (`evaluation/generate_ground_truth.py`,
 ~6 questions/chunk), the course-aligned approach. **MRR** is the primary metric
-(ranking quality). On this larger, more diverse set the full pipeline —
-hybrid search (Reciprocal Rank Fusion of dense + keyword) **plus** a re-ranking
-stage — wins on both metrics, and the re-ranker clearly helps (0.704 > 0.679).
-Both best practices (hybrid + re-ranking) are implemented in `search.py`;
-`PQC_RAG_RETRIEVAL` / the UI selector let you switch strategy.
+(ranking quality). The full pipeline — hybrid search (Reciprocal Rank Fusion of
+dense + keyword) **plus** re-ranking — wins on MRR, and the re-ranker clearly
+helps (0.704 > 0.679). **Query rewriting** (acronym expansion) was also evaluated:
+it gives the best Hit Rate (0.877) but slightly lower MRR, so `rerank` stays the
+default. All three best practices (hybrid, re-ranking, query rewriting) live in
+`search.py`; `PQC_RAG_RETRIEVAL` / the UI selector switch strategy.
 
 ## Evaluation criteria map (LLM Zoomcamp)
 
@@ -112,7 +160,7 @@ relevant code quickly.
 | Containerization | `docker-compose.yml` | ⏳ |
 | Reproducibility | this README, pinned deps | ⏳ |
 | Best practices: hybrid search + re-ranking | `search.py`, `evaluation/RESULTS.md` | ✅ |
-| Best practices: query rewriting | next (phase 4) | ⏳ |
+| Best practices: query rewriting | `search.py` (heuristic + LLM), `RESULTS.md` | ✅ |
 | Cloud deployment (bonus) | `deploy/` | ⏳ |
 
 ## Roadmap

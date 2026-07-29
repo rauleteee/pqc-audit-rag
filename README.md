@@ -33,38 +33,81 @@ a seeded public corpus. See the roadmap below.
 ## Architecture
 
 ```mermaid
-flowchart LR
-    project["Local Python project<br/>(source code + dependency manifests)"]
-
-    subgraph pipeline["Audit pipeline (deterministic — the LLM only writes the prose)"]
-        direction LR
-        detect["1. Detect<br/>the pqc-audit engine statically scans the code<br/>and finds quantum-vulnerable cryptography<br/>(RSA, ECC, DSA, Diffie-Hellman, Ed25519)"]
-        retrieve["2. Retrieve (RAG)<br/>for each finding, search the knowledge base<br/>for the relevant migration guidance"]
-        synthesize["3. Synthesize<br/>a local LLM (Ollama) writes a cited<br/>post-quantum migration plan per finding"]
-        report["4. Report<br/>exposure summary + migration plan, as<br/>CLI output, a web UI, or Markdown / HTML"]
-        detect --> retrieve --> synthesize --> report
+flowchart TB
+    subgraph interfaces["Interfaces"]
+        cli["CLI"]
+        ui["Web UI<br/>(Streamlit)"]
     end
 
-    kb[("Post-quantum knowledge base<br/>curated public docs (NIST, CNSA 2.0, ...)<br/>chunked into embeddings + keyword index")]
-    eval["Offline evaluation<br/>retrieval quality (Hit Rate / MRR)<br/>and answer quality (LLM-as-judge)"]
+    orch["Orchestrator<br/>(run_audit)"]
+    engine["Detection engine<br/>(pqc-audit)"]
+    report["Report<br/>(Markdown / HTML)"]
+    feedback["Feedback store<br/>(JSONL)"]
 
-    project --> detect
-    kb -. supplies guidance .-> retrieve
-    retrieve -. measured by .-> eval
-    synthesize -. measured by .-> eval
+    subgraph rag["Retrieval-augmented generation"]
+        retriever["Retriever<br/>(hybrid + rerank + rewrite)"]
+        synth["LLM synthesizer"]
+    end
 
-    classDef stage fill:#eaf2fb,stroke:#2f6fb0,color:#12395c;
-    classDef data fill:#eef7ee,stroke:#2e7d32,color:#14471a;
-    classDef check fill:#f4eef9,stroke:#7a4fb5,color:#3a2159;
-    class detect,retrieve,synthesize,report stage;
-    class project,kb data;
-    class eval check;
+    llm["LLM runtime<br/>(Ollama · llama3.1)"]
+
+    subgraph kbase["Knowledge base"]
+        corpus["Corpus<br/>(Markdown + sources)"]
+        ingest["Ingestion<br/>(chunking)"]
+        embed["Embeddings<br/>(ONNX MiniLM)"]
+        vstore["Vector store<br/>(LanceDB)"]
+        kindex["Keyword index<br/>(minsearch)"]
+    end
+
+    evalz["Evaluation<br/>(retrieval + LLM-as-judge)"]
+
+    cli --> orch
+    ui --> orch
+    ui --> feedback
+    orch --> engine
+    orch --> retriever
+    orch --> synth
+    orch --> report
+    retriever --> vstore
+    retriever --> kindex
+    synth --> llm
+    corpus --> ingest
+    ingest --> embed
+    embed --> vstore
+    ingest --> kindex
+    evalz -.-> retriever
+    evalz -.-> synth
+
+    classDef iface fill:#eaf2fb,stroke:#2f6fb0,color:#12395c;
+    classDef kbc fill:#eef7ee,stroke:#2e7d32,color:#14471a;
+    classDef llmc fill:#fdf0e6,stroke:#c77800,color:#5c3a00;
+    classDef evalc fill:#f4eef9,stroke:#7a4fb5,color:#3a2159;
+    class cli,ui iface;
+    class corpus,ingest,embed,vstore,kindex kbc;
+    class llm,synth llmc;
+    class evalz evalc;
 ```
 
-The **detection is not reimplemented** — this app consumes `pqc-audit` as a
-library. This layer adds the migration knowledge (RAG), orchestration and report.
-Dependencies point inward (interfaces → RAG → knowledge base / engine); the LLM
-only synthesizes prose, the control flow is deterministic code.
+**Components**
+
+| Component | Implementation |
+|---|---|
+| CLI / Web UI | `pqc-audit-rag` command · a Streamlit app |
+| Orchestrator | `run_audit()` — deterministic scan → group → retrieve → synthesize → report |
+| Detection engine | `pqc-audit` (OSS), static AST scan — consumed as a dependency, not reimplemented |
+| Retriever | hybrid search (RRF of vector + keyword) + re-ranking + query rewriting |
+| Corpus | curated Markdown with source references (NIST, CNSA 2.0, …) |
+| Ingestion | chunk the corpus by section |
+| Embeddings | ONNX MiniLM (`all-MiniLM-L6-v2`) — local, no torch |
+| Vector store | LanceDB (on-disk) or in-memory |
+| Keyword index | minsearch |
+| LLM synthesizer | writes the cited migration plan grounded in retrieved passages |
+| LLM runtime | Ollama running `llama3.1`, via the OpenAI-compatible API |
+| Report | Markdown / HTML |
+| Feedback store | thumbs up/down persisted as JSONL (monitoring seed) |
+| Evaluation | retrieval (Hit Rate / MRR) + LLM-as-judge (faithfulness / actionability) |
+
+The LLM only synthesizes prose; the control flow is deterministic code.
 
 ## Quickstart
 

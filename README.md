@@ -72,6 +72,24 @@ uv pip install -e ".[dev]"
 pytest -q
 ```
 
+## Retrieval evaluation
+
+Four retrieval strategies are evaluated against a ground-truth question set
+(`evaluation/ground_truth.json`) with **Hit Rate** and **MRR**; the best is wired
+as the default. Reproduce with `python evaluation/evaluate_retrieval.py` (writes
+`evaluation/RESULTS.md`). Latest run (18 questions, k=4, ONNX embeddings):
+
+| Method | Hit Rate | MRR |
+|---|---|---|
+| dense (vector) | 1.000 | 0.847 |
+| text (minsearch) | 1.000 | 0.796 |
+| hybrid (RRF) | 1.000 | 0.824 |
+| **hybrid + rerank (best)** | **1.000** | **0.898** |
+
+Hybrid search (Reciprocal Rank Fusion of dense + keyword) and a re-ranking stage
+are the two "best practices" from the rubric; `search.py` implements both, and
+`PQC_RAG_RETRIEVAL` / the UI selector let you switch strategy.
+
 ## Evaluation criteria map (LLM Zoomcamp)
 
 This section is filled in as each phase lands, so reviewers can find the
@@ -81,14 +99,15 @@ relevant code quickly.
 |---|---|---|
 | Problem description | this README | ✅ |
 | Retrieval flow (KB + LLM) | `retrieval.py`, `synthesis.py`, `pipeline.py` | ✅ |
-| Retrieval evaluation | `evaluation/` (multiple approaches) | ⏳ |
+| Retrieval evaluation | `evaluation/evaluate_retrieval.py`, `RESULTS.md` (4 methods) | ✅ |
 | LLM evaluation | `evaluation/` (LLM-as-judge, prompts) | ⏳ |
 | Interface | `app/streamlit_app.py` (Streamlit UI) | ✅ |
 | Ingestion pipeline | `knowledge_base/ingest.py` (LanceDB) + `ingestion/dlt_pipeline.py` (dlt→DuckDB) | ✅ (automated) |
 | Monitoring | user feedback in `feedback.py`; Postgres + Grafana next | 🟡 feedback done |
 | Containerization | `docker-compose.yml` | ⏳ |
 | Reproducibility | this README, pinned deps | ⏳ |
-| Best practices (hybrid, re-rank, rewrite) | `evaluation/`, `retrieval.py` | ⏳ |
+| Best practices: hybrid search + re-ranking | `search.py`, `evaluation/RESULTS.md` | ✅ |
+| Best practices: query rewriting | next (phase 4) | ⏳ |
 | Cloud deployment (bonus) | `deploy/` | ⏳ |
 
 ## Roadmap
@@ -97,7 +116,8 @@ relevant code quickly.
 1. ✅ RAG core (scan → group → retrieve → synthesize → report) + public corpus.
 2. ✅ Automated ingestion pipeline (chunking + embeddings + persistent LanceDB;
    plus a dlt→DuckDB pipeline, course-aligned).
-3. ⏳ Retrieval evaluation (vector vs hybrid vs re-ranking).
+3. ✅ Retrieval evaluation (dense vs text vs hybrid/RRF vs re-ranking; Hit
+   Rate/MRR). Winner (hybrid + rerank) wired as the default.
 4. ⏳ LLM evaluation (multiple prompts + LLM-as-judge) + query rewriting.
 5. ✅ Streamlit UI + user feedback.
 6. ⏳ Monitoring (Postgres + Grafana, ≥5 charts).

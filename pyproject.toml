@@ -15,8 +15,9 @@ keywords = ["post-quantum", "cryptography", "rag", "llm", "pqc", "migration"]
 dependencies = [
     # OSS detection engine (inventory). Published on PyPI.
     "pqc-audit>=0.1.1",
-    "pydantic>=2.6",   # domain models + structured outputs
-    "numpy>=1.26",     # embeddings math / in-memory vector search
+    "pydantic>=2.6",    # domain models + structured outputs
+    "numpy>=1.26",      # embeddings math / in-memory vector search
+    "minsearch>=0.1",   # keyword search for the hybrid/rerank retriever (default)
 ]
 
 [project.optional-dependencies]

@@ -134,6 +134,11 @@ def main() -> None:
             help="LLM needs a running Ollama server; Offline needs nothing.",
         )
         model = st.text_input("LLM model", value=settings.llm_model)
+        method = st.selectbox(
+            "Retrieval method",
+            ["rerank", "hybrid", "dense", "text"],
+            help="Evaluated in evaluation/RESULTS.md; 'rerank' scored best.",
+        )
         top_k = st.slider("Retrieved passages (top-k)", 1, 8, settings.top_k)
         run = st.button("Run audit", type="primary", use_container_width=True)
 
@@ -146,7 +151,9 @@ def main() -> None:
         synthesizer = FakeSynthesizer() if offline else LLMSynthesizer(model=model)
         try:
             with st.spinner("Scanning, retrieving and synthesizing…"):
-                report = run_audit(str(target), synthesizer=synthesizer, top_k=top_k)
+                report = run_audit(
+                    str(target), synthesizer=synthesizer, method=method, top_k=top_k
+                )
         except Exception as exc:  # pragma: no cover - UI convenience
             st.error(
                 f"LLM synthesis failed: {exc}\n\nIs the LLM endpoint up "

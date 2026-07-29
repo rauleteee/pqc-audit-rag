@@ -1,0 +1,20 @@
+[
+  {"question": "What is ML-KEM and which FIPS standard defines it?", "chunk_id": "nist_standards.md#1"},
+  {"question": "Which post-quantum standard replaces ECDSA and EdDSA signatures?", "chunk_id": "primitive_mapping.md#2"},
+  {"question": "What is FIPS 205 SLH-DSA and when should it be used?", "chunk_id": "nist_standards.md#3"},
+  {"question": "What should ECDH and Diffie-Hellman key exchange migrate to?", "chunk_id": "primitive_mapping.md#1"},
+  {"question": "Is AES-128 safe against quantum computers and what replaces it?", "chunk_id": "primitive_mapping.md#3"},
+  {"question": "Which hash functions like MD5 and SHA-1 are broken and must be replaced?", "chunk_id": "primitive_mapping.md#4"},
+  {"question": "What is the NSA CNSA 2.0 timeline for adopting post-quantum algorithms?", "chunk_id": "timelines_compliance.md#1"},
+  {"question": "What does harvest-now decrypt-later mean and why is it urgent?", "chunk_id": "timelines_compliance.md#4"},
+  {"question": "What guidance did OMB M-23-02 issue for US federal agencies on PQC?", "chunk_id": "timelines_compliance.md#2"},
+  {"question": "What do Germany BSI and France ANSSI recommend for the European PQC transition?", "chunk_id": "timelines_compliance.md#3"},
+  {"question": "Which algorithm is the primary FIPS 204 standard for digital signatures?", "chunk_id": "nist_standards.md#2"},
+  {"question": "Do I need to migrate code that already uses Kyber or Dilithium?", "chunk_id": "primitive_mapping.md#5"},
+  {"question": "What AES key size resists Grover's algorithm for symmetric encryption?", "chunk_id": "nist_standards.md#4"},
+  {"question": "When did NIST publish the first finalized post-quantum standards?", "chunk_id": "nist_standards.md#0"},
+  {"question": "What ML-KEM parameter set and hybrid approach are recommended for key establishment?", "chunk_id": "nist_standards.md#1"},
+  {"question": "How should RSA signatures using PKCS#1 or PSS be migrated?", "chunk_id": "primitive_mapping.md#2"},
+  {"question": "How does the primitive-to-target mapping organize migration by usage?", "chunk_id": "primitive_mapping.md#0"},
+  {"question": "Why is key establishment migration prioritized over signature migration?", "chunk_id": "timelines_compliance.md#4"}
+]

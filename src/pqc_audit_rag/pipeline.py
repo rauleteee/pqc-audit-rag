@@ -14,10 +14,10 @@ from pqc_scanner import scan
 from pqc_audit_rag.config import settings
 from pqc_audit_rag.grouping import group_exposures
 from pqc_audit_rag.knowledge_base.embedder import Embedder
-from pqc_audit_rag.knowledge_base.ingest import load_or_build
 from pqc_audit_rag.knowledge_base.store import VectorStore
 from pqc_audit_rag.models import AuditReport
 from pqc_audit_rag.retrieval import Retriever
+from pqc_audit_rag.search import make_retriever
 from pqc_audit_rag.synthesis import FakeSynthesizer, Synthesizer
 
 
@@ -40,20 +40,26 @@ def run_audit(
     embedder: Embedder | None = None,
     index_path: str | None = None,
     rebuild_index: bool = False,
+    method: str | None = None,
     top_k: int | None = None,
 ) -> AuditReport:
     """Run a full audit and return an ``AuditReport``.
 
     Retrieval wiring: pass a ready ``retriever``, or a ``store`` + ``embedder``,
-    or an ``index_path`` to a persistent LanceDB index, or nothing (a fresh
-    in-memory index is built from the corpus).
+    or an ``index_path`` to a persistent LanceDB index, or nothing. ``method``
+    selects the retrieval strategy (dense|text|hybrid|rerank); the default comes
+    from the evaluation (``settings.retrieval_method``).
     """
     top_k = top_k or settings.top_k
 
     if retriever is None:
-        if store is None or embedder is None:
-            store, embedder = load_or_build(index_path, embedder, rebuild_index)
-        retriever = Retriever(store, embedder)
+        retriever = make_retriever(
+            method or settings.retrieval_method,
+            store=store,
+            embedder=embedder,
+            index_path=index_path,
+            rebuild=rebuild_index,
+        )
 
     synthesizer = synthesizer or FakeSynthesizer()
 

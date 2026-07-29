@@ -22,6 +22,14 @@ def test_run_audit_end_to_end(vulnerable_file, retriever):
     assert rec.citations  # grounded in retrieved passages
 
 
+def test_run_audit_default_retrieval(vulnerable_file):
+    # No retriever injected: exercises make_retriever with the default method.
+    report = run_audit(str(vulnerable_file), synthesizer=FakeSynthesizer())
+    assert report.counts["CRITICAL"] >= 1
+    assert report.recommendations
+    assert report.recommendations[0].citations
+
+
 def test_run_audit_clean_file(tmp_path, retriever):
     clean = tmp_path / "clean.py"
     clean.write_text("x = 1 + 1\n")

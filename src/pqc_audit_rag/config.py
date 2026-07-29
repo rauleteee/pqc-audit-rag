@@ -35,6 +35,9 @@ class Settings:
 
     db_path: str = os.environ.get("PQC_RAG_DB", ".pqc_rag_index")
     top_k: int = int(os.environ.get("PQC_RAG_TOPK", "4"))
+    # Default retrieval strategy (dense|text|hybrid|rerank). The evaluation
+    # (evaluation/evaluate_retrieval.py) picks "rerank" as the best.
+    retrieval_method: str = os.environ.get("PQC_RAG_RETRIEVAL", "rerank")
 
 
 settings = Settings()

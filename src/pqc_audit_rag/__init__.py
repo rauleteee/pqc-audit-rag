@@ -15,7 +15,14 @@ from pqc_audit_rag.models import (
 )
 from pqc_audit_rag.pipeline import run_audit
 from pqc_audit_rag.report import to_html, to_markdown
+from pqc_audit_rag.metrics import evaluate
 from pqc_audit_rag.retrieval import Retriever, build_query
+from pqc_audit_rag.search import (
+    HybridRetriever,
+    RerankRetriever,
+    TextRetriever,
+    make_retriever,
+)
 from pqc_audit_rag.synthesis import FakeSynthesizer, LLMSynthesizer, OllamaSynthesizer
 from pqc_audit_rag.version import __version__
 
@@ -25,6 +32,11 @@ __all__ = [
     "group_exposures",
     "build_query",
     "Retriever",
+    "TextRetriever",
+    "HybridRetriever",
+    "RerankRetriever",
+    "make_retriever",
+    "evaluate",
     "FakeSynthesizer",
     "LLMSynthesizer",
     "OllamaSynthesizer",

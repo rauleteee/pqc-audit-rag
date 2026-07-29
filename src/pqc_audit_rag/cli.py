@@ -29,6 +29,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Use the deterministic synthesizer instead of the LLM.",
     )
     audit.add_argument("--model", default=None, help="LLM model (default from env).")
+    audit.add_argument(
+        "--index",
+        default=None,
+        help="Path to a persistent LanceDB index (default: build in-memory).",
+    )
+    audit.add_argument(
+        "--rebuild", action="store_true", help="Rebuild the persistent index."
+    )
 
     sub.add_parser("ingest", help="Build the persistent vector index from the corpus.")
     return parser
@@ -45,7 +53,12 @@ def main(argv: list[str] | None = None) -> int:
 
     synthesizer = FakeSynthesizer() if args.offline else LLMSynthesizer(model=args.model)
     try:
-        report = run_audit(args.path, synthesizer=synthesizer)
+        report = run_audit(
+            args.path,
+            synthesizer=synthesizer,
+            index_path=args.index,
+            rebuild_index=args.rebuild,
+        )
     except Exception as exc:  # pragma: no cover - CLI convenience
         if not args.offline:
             print(

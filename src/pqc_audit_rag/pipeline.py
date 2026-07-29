@@ -14,7 +14,7 @@ from pqc_scanner import scan
 from pqc_audit_rag.config import settings
 from pqc_audit_rag.grouping import group_exposures
 from pqc_audit_rag.knowledge_base.embedder import Embedder
-from pqc_audit_rag.knowledge_base.ingest import build_index
+from pqc_audit_rag.knowledge_base.ingest import load_or_build
 from pqc_audit_rag.knowledge_base.store import VectorStore
 from pqc_audit_rag.models import AuditReport
 from pqc_audit_rag.retrieval import Retriever
@@ -38,18 +38,21 @@ def run_audit(
     retriever: Retriever | None = None,
     store: VectorStore | None = None,
     embedder: Embedder | None = None,
+    index_path: str | None = None,
+    rebuild_index: bool = False,
     top_k: int | None = None,
 ) -> AuditReport:
     """Run a full audit and return an ``AuditReport``.
 
     Retrieval wiring: pass a ready ``retriever``, or a ``store`` + ``embedder``,
-    or nothing (a fresh in-memory index is built from the corpus).
+    or an ``index_path`` to a persistent LanceDB index, or nothing (a fresh
+    in-memory index is built from the corpus).
     """
     top_k = top_k or settings.top_k
 
     if retriever is None:
         if store is None or embedder is None:
-            store, embedder = build_index(store=store, embedder=embedder)
+            store, embedder = load_or_build(index_path, embedder, rebuild_index)
         retriever = Retriever(store, embedder)
 
     synthesizer = synthesizer or FakeSynthesizer()

@@ -27,8 +27,10 @@ local-embed = ["onnxruntime>=1.17", "tokenizers>=0.15", "huggingface-hub>=0.23"]
 vector = ["lancedb>=0.13"]
 # LLM synthesis over any OpenAI-compatible endpoint (local Ollama by default).
 llm = ["openai>=1.40"]
-# Interface (added in a later phase).
+# Interface.
 app = ["streamlit>=1.36"]
+# Course-aligned automated ingestion via dlt (loads the corpus into DuckDB).
+ingest = ["dlt[duckdb]>=1.0"]
 dev = ["pytest>=7.0"]
 
 [project.scripts]

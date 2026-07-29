@@ -60,6 +60,29 @@ def build_index(
     return store, embedder
 
 
+def load_or_build(
+    path: str | None = None,
+    embedder: Embedder | None = None,
+    rebuild: bool = False,
+) -> tuple[VectorStore, Embedder]:
+    """Return a ready (store, embedder).
+
+    With ``path``: open the persistent LanceDB index and reuse it as-is; build it
+    once if empty (or if ``rebuild``). Without ``path``: build a fresh in-memory
+    index from the corpus. The same embedder must build and query an index, so
+    both come from here.
+    """
+    embedder = embedder or get_embedder(settings.embed_model_dir)
+    if not path:
+        store, embedder = build_index(store=InMemoryStore(), embedder=embedder)
+        return store, embedder
+
+    store = open_store(path)
+    if rebuild or len(store) == 0:
+        build_index(store=store, embedder=embedder)
+    return store, embedder
+
+
 def main() -> None:
     """Build a persistent index at ``settings.db_path``."""
     store = open_store(settings.db_path)

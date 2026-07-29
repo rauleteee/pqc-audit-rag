@@ -9,5 +9,7 @@ build/
 .pqc_rag_index/
 *.lance/
 models/
+*.duckdb
+.dlt/
 .env
 .ipynb_checkpoints/

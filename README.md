@@ -84,7 +84,7 @@ relevant code quickly.
 | Retrieval evaluation | `evaluation/` (multiple approaches) | ⏳ |
 | LLM evaluation | `evaluation/` (LLM-as-judge, prompts) | ⏳ |
 | Interface | `app/streamlit_app.py` (Streamlit UI) | ✅ |
-| Ingestion pipeline | `knowledge_base/ingest.py` | ✅ (automated) |
+| Ingestion pipeline | `knowledge_base/ingest.py` (LanceDB) + `ingestion/dlt_pipeline.py` (dlt→DuckDB) | ✅ (automated) |
 | Monitoring | user feedback in `feedback.py`; Postgres + Grafana next | 🟡 feedback done |
 | Containerization | `docker-compose.yml` | ⏳ |
 | Reproducibility | this README, pinned deps | ⏳ |
@@ -95,7 +95,8 @@ relevant code quickly.
 
 0. ✅ Repo scaffold + packaging.
 1. ✅ RAG core (scan → group → retrieve → synthesize → report) + public corpus.
-2. ⏳ Automated ingestion pipeline (chunking + embeddings + LanceDB).
+2. ✅ Automated ingestion pipeline (chunking + embeddings + persistent LanceDB;
+   plus a dlt→DuckDB pipeline, course-aligned).
 3. ⏳ Retrieval evaluation (vector vs hybrid vs re-ranking).
 4. ⏳ LLM evaluation (multiple prompts + LLM-as-judge) + query rewriting.
 5. ✅ Streamlit UI + user feedback.

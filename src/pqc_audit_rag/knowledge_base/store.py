@@ -78,13 +78,13 @@ class LanceDBStore:
             }
             for i, c in enumerate(chunks)
         ]
-        if self._table in self._db.table_names():
+        if self._table in self._db.list_tables().tables:
             self._db.open_table(self._table).add(rows)
         else:
             self._db.create_table(self._table, data=rows)
 
     def search(self, vector: np.ndarray, top_k: int) -> list[tuple[Chunk, float]]:
-        if self._table not in self._db.table_names():
+        if self._table not in self._db.list_tables().tables:
             return []
         rows = (
             self._db.open_table(self._table)
@@ -100,7 +100,7 @@ class LanceDBStore:
         return results
 
     def __len__(self) -> int:
-        if self._table not in self._db.table_names():
+        if self._table not in self._db.list_tables().tables:
             return 0
         return self._db.open_table(self._table).count_rows()
 

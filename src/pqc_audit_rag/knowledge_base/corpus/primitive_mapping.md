@@ -1,7 +1,10 @@
 # Primitive-to-PQC migration mapping
 
 How to map each detected quantum-vulnerable primitive to a NIST post-quantum
-target, by usage context. Source: NIST FIPS 203/204/205; NSA CNSA 2.0.
+target, by usage context.
+
+**Sources:** NIST FIPS 203/204/205 (https://csrc.nist.gov/projects/post-quantum-cryptography);
+NSA Commercial National Security Algorithm Suite 2.0 (https://www.nsa.gov).
 
 ## Key exchange / key establishment -> ML-KEM (FIPS 203)
 

@@ -48,7 +48,9 @@ def main() -> None:
     embedder_name = type(embedder).__name__
 
     rows = {name: evaluate(r, ground_truth, k=K) for name, r in retrievers.items()}
-    best = max(rows, key=lambda name: (rows[name]["hit_rate"], rows[name]["mrr"]))
+    # MRR is the primary metric (ranking quality); Hit Rate is near-saturated on
+    # this corpus, so it only breaks ties.
+    best = max(rows, key=lambda name: (rows[name]["mrr"], rows[name]["hit_rate"]))
 
     header = (
         f"# Retrieval evaluation\n\n"
@@ -62,9 +64,11 @@ def main() -> None:
         for name, m in rows.items()
     )
     footer = (
-        f"\n**Winner: {best}** — wired as the default retrieval method.\n\n"
+        f"\n**Winner (by MRR): {best}** — wired as the default retrieval method.\n\n"
         "Hit Rate = fraction of questions whose relevant chunk is in the top-k. "
-        "MRR = mean reciprocal rank of the relevant chunk.\n"
+        "MRR = mean reciprocal rank of the relevant chunk. MRR is the primary "
+        "metric here (ranking quality); Hit Rate is near-saturated and only breaks "
+        "ties.\n"
     )
     RESULTS.write_text(header + body + footer, encoding="utf-8")
 

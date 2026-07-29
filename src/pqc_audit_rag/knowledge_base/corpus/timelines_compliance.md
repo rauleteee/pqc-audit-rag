@@ -4,6 +4,11 @@ Regulatory deadlines that drive PQC migration priority. Dates are approximate
 and summarized from public guidance; verify against the primary source before
 client use.
 
+**Sources:** NSA CNSA 2.0 (https://www.nsa.gov); OMB Memorandum M-23-02
+(https://www.whitehouse.gov); NIST SP 1800-38, NCCoE Migration to Post-Quantum
+Cryptography (https://www.nccoe.nist.gov); Germany BSI (https://www.bsi.bund.de);
+France ANSSI (https://cyber.gouv.fr).
+
 ## United States — NSA CNSA 2.0
 
 The NSA Commercial National Security Algorithm Suite 2.0 sets a timeline for

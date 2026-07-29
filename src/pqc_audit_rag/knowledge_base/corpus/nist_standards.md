@@ -2,8 +2,12 @@
 
 On 13 August 2024, NIST published the first three finalized post-quantum
 cryptography standards. These are the migration targets for quantum-vulnerable
-public-key cryptography. Source: NIST, "NIST Releases First 3 Finalized
-Post-Quantum Encryption Standards" (2024-08-13).
+public-key cryptography.
+
+**Sources:** NIST FIPS 203 (https://csrc.nist.gov/pubs/fips/203/final), FIPS 204
+(https://csrc.nist.gov/pubs/fips/204/final), FIPS 205
+(https://csrc.nist.gov/pubs/fips/205/final); NIST Post-Quantum Cryptography
+project (https://csrc.nist.gov/projects/post-quantum-cryptography).
 
 ## FIPS 203 — ML-KEM (Module-Lattice Key-Encapsulation Mechanism)
 

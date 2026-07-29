@@ -23,6 +23,18 @@ from pqc_audit_rag.synthesis import FakeSynthesizer, LLMSynthesizer
 
 TONE = {"CRITICAL": "#d12d2d", "MEDIUM": "#c77800", "INFO": "#1f7ab5", "clean": "#2e7d32"}
 
+EXAMPLES_DIR = Path(__file__).parents[1] / "examples"
+
+# One-line description per bundled example (for the picker).
+EXAMPLE_DESCRIPTIONS = {
+    "vulnerable_sample.py": "Kitchen sink · pyca/cryptography — RSA, ECC, DSA, DH, Ed25519, AES",
+    "ssh_paramiko.py": "SSH host keys · paramiko — RSA, ECDSA, DSA (all CRITICAL)",
+    "pycryptodome_app.py": "Key generation · pycryptodome — RSA, DSA, EC (all CRITICAL)",
+    "pynacl_messaging.py": "Messaging keys · PyNaCl — Ed25519 + Curve25519 (CRITICAL)",
+    "weak_hashing.py": "Weakened, not broken · MD5, SHA-1, AES-128 (all MEDIUM)",
+    "post_quantum_ready.py": "Already post-quantum · ML-KEM + ML-DSA (INFO — clean verdict)",
+}
+
 _CSS = """
 <style>
   .pqc-sub { color: #888; font-size: .85rem; margin: -.4rem 0 1rem; }
@@ -127,7 +139,21 @@ def main() -> None:
 
     with st.sidebar:
         st.header("Audit")
-        path = st.text_input("Project path", value="examples/vulnerable_sample.py")
+
+        example_files = sorted(p.name for p in EXAMPLES_DIR.glob("*.py"))
+        options = example_files + ["Custom path…"]
+        default_index = (
+            example_files.index("vulnerable_sample.py")
+            if "vulnerable_sample.py" in example_files
+            else 0
+        )
+        choice = st.selectbox("Example project", options, index=default_index)
+        if choice == "Custom path…":
+            path = st.text_input("Project path", value="examples/vulnerable_sample.py")
+        else:
+            path = str(EXAMPLES_DIR / choice)
+            if choice in EXAMPLE_DESCRIPTIONS:
+                st.caption(EXAMPLE_DESCRIPTIONS[choice])
         mode = st.radio(
             "Synthesis",
             ["LLM (Ollama)", "Offline (deterministic)"],

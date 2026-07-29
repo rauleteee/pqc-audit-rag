@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pqc-audit-rag"
+dynamic = ["version"]
+description = "RAG/agent app that turns a pqc-audit crypto inventory into actionable post-quantum migration guidance, using a free local stack (Ollama + sentence-transformers)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "rauleteee" }]
+keywords = ["post-quantum", "cryptography", "rag", "llm", "pqc", "migration"]
+
+dependencies = [
+    # OSS detection engine (inventory). Published on PyPI.
+    "pqc-audit>=0.1.1",
+    "pydantic>=2.6",   # domain models + structured outputs
+    "numpy>=1.26",     # embeddings math / in-memory vector search
+]
+
+[project.optional-dependencies]
+# Real local embeddings via ONNX (light — no torch). Optional so the package
+# imports and tests run without it; embedder.py falls back to a hashing embedder.
+local-embed = ["onnxruntime>=1.17", "tokenizers>=0.15", "huggingface-hub>=0.23"]
+# On-disk vector store (no server).
+vector = ["lancedb>=0.13"]
+# LLM synthesis over any OpenAI-compatible endpoint (local Ollama by default).
+llm = ["openai>=1.40"]
+# Interface (added in a later phase).
+app = ["streamlit>=1.36"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+pqc-audit-rag = "pqc_audit_rag.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "pqc_audit_rag.version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["pqc_audit_rag*"]
+
+[tool.setuptools.package-data]
+# Ship the public corpus with the wheel so ingestion works from an install.
+"pqc_audit_rag.knowledge_base" = ["corpus/*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

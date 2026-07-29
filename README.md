@@ -33,56 +33,32 @@ a seeded public corpus. See the roadmap below.
 ## Architecture
 
 ```mermaid
-flowchart TD
-    proj["📁 Local Python project"]
+flowchart LR
+    project["Local Python project<br/>(source code + dependency manifests)"]
 
-    subgraph detect["🔍 Detection · pqc-audit OSS engine"]
-        scan["scan() · AST"] --> findings["Findings"]
-        findings --> group["group_exposures()"] --> exp["Exposures"]
+    subgraph pipeline["Audit pipeline (deterministic — the LLM only writes the prose)"]
+        direction LR
+        detect["1. Detect<br/>the pqc-audit engine statically scans the code<br/>and finds quantum-vulnerable cryptography<br/>(RSA, ECC, DSA, Diffie-Hellman, Ed25519)"]
+        retrieve["2. Retrieve (RAG)<br/>for each finding, search the knowledge base<br/>for the relevant migration guidance"]
+        synthesize["3. Synthesize<br/>a local LLM (Ollama) writes a cited<br/>post-quantum migration plan per finding"]
+        report["4. Report<br/>exposure summary + migration plan, as<br/>CLI output, a web UI, or Markdown / HTML"]
+        detect --> retrieve --> synthesize --> report
     end
 
-    subgraph kb["📚 Knowledge base"]
-        corpus["Curated corpus<br/>markdown + Sources"] --> ing["Ingest · chunk"]
-        ing --> onnx["ONNX embeddings"] --> vec["Vector store<br/>LanceDB / in-memory"]
-        ing --> kw["Keyword index<br/>minsearch"]
-    end
+    kb[("Post-quantum knowledge base<br/>curated public docs (NIST, CNSA 2.0, ...)<br/>chunked into embeddings + keyword index")]
+    eval["Offline evaluation<br/>retrieval quality (Hit Rate / MRR)<br/>and answer quality (LLM-as-judge)"]
 
-    subgraph rag["🤖 RAG pipeline"]
-        query["build query<br/>+ rewriting"] --> retr["Retriever<br/>hybrid RRF + rerank"]
-        retr --> pass["Cited passages"]
-        pass --> synth["LLM synthesizer<br/>Ollama · OpenAI-compatible"]
-        synth --> rec["MigrationRecommendation"]
-    end
+    project --> detect
+    kb -. supplies guidance .-> retrieve
+    retrieve -. measured by .-> eval
+    synthesize -. measured by .-> eval
 
-    subgraph out["📤 Output & interfaces"]
-        report["AuditReport<br/>Markdown / HTML"]
-        cli["CLI"]
-        ui["Streamlit UI"]
-        fb["User feedback · JSONL"]
-    end
-
-    subgraph evalz["🧪 Evaluation"]
-        reval["Retrieval eval<br/>Hit Rate / MRR"]
-        leval["LLM-as-judge<br/>faithfulness / actionability"]
-    end
-
-    proj --> scan
-    exp --> query
-    vec --> retr
-    kw --> retr
-    exp --> synth
-    rec --> report
-    report --> cli
-    report --> ui
-    ui --> fb
-    retr -.-> reval
-    synth -.-> leval
-
-    style detect fill:#e8f0fe,stroke:#1f7ab5,stroke-width:2px
-    style kb fill:#eef7ee,stroke:#2e7d32,stroke-width:2px
-    style rag fill:#fdf0e6,stroke:#c77800,stroke-width:2px
-    style out fill:#f6f6f7,stroke:#888,stroke-width:2px
-    style evalz fill:#f3eef9,stroke:#7a4fb5,stroke-width:2px
+    classDef stage fill:#eaf2fb,stroke:#2f6fb0,color:#12395c;
+    classDef data fill:#eef7ee,stroke:#2e7d32,color:#14471a;
+    classDef check fill:#f4eef9,stroke:#7a4fb5,color:#3a2159;
+    class detect,retrieve,synthesize,report stage;
+    class project,kb data;
+    class eval check;
 ```
 
 The **detection is not reimplemented** — this app consumes `pqc-audit` as a

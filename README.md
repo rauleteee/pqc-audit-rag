@@ -56,7 +56,14 @@ python -m pqc_audit_rag.knowledge_base.ingest
 # 2. Pull a local model (once) and run an audit
 ollama pull llama3.1
 pqc-audit-rag audit ./path/to/project --md
+
+# ...or launch the web UI to try it on a real project
+streamlit run app/streamlit_app.py
 ```
+
+The UI mirrors the pqc-scanner report style (verdict banner, severity chips,
+per-exposure cards with cited migration guidance) and collects 👍/👎 feedback.
+Use **Offline mode** in the sidebar to try it without a running LLM.
 
 Run the tests (no Ollama / no torch needed — uses the offline fallbacks):
 
@@ -76,9 +83,9 @@ relevant code quickly.
 | Retrieval flow (KB + LLM) | `retrieval.py`, `synthesis.py`, `pipeline.py` | ✅ |
 | Retrieval evaluation | `evaluation/` (multiple approaches) | ⏳ |
 | LLM evaluation | `evaluation/` (LLM-as-judge, prompts) | ⏳ |
-| Interface | `app/` (Streamlit) | ⏳ |
+| Interface | `app/streamlit_app.py` (Streamlit UI) | ✅ |
 | Ingestion pipeline | `knowledge_base/ingest.py` | ✅ (automated) |
-| Monitoring | Postgres + Grafana | ⏳ |
+| Monitoring | user feedback in `feedback.py`; Postgres + Grafana next | 🟡 feedback done |
 | Containerization | `docker-compose.yml` | ⏳ |
 | Reproducibility | this README, pinned deps | ⏳ |
 | Best practices (hybrid, re-rank, rewrite) | `evaluation/`, `retrieval.py` | ⏳ |
@@ -91,7 +98,7 @@ relevant code quickly.
 2. ⏳ Automated ingestion pipeline (chunking + embeddings + LanceDB).
 3. ⏳ Retrieval evaluation (vector vs hybrid vs re-ranking).
 4. ⏳ LLM evaluation (multiple prompts + LLM-as-judge) + query rewriting.
-5. ⏳ Streamlit UI + user feedback.
+5. ✅ Streamlit UI + user feedback.
 6. ⏳ Monitoring (Postgres + Grafana, ≥5 charts).
 7. ⏳ Containerization (docker-compose) + reproducibility polish.
 8. ⏳ Cloud deployment (bonus).

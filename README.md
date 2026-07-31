@@ -140,7 +140,15 @@ The UI has an **example picker** (several scenarios: SSH, JWT-style, messaging,
 already-post-quantum) plus a custom path, a verdict banner, severity chips,
 per-exposure cards with cited migration guidance, live progress, and 👍/👎
 feedback. **Offline mode** in the sidebar runs everything except the LLM (instant,
-no Ollama needed).
+no Ollama needed). The **LLM provider** selector switches between local Ollama and
+a hosted OpenAI-compatible API (see below).
+
+Same app, two backends — a local Ollama model, and a hosted Groq model returning a
+fuller cited migration plan:
+
+![PQC Audit RAG UI with the local Ollama provider — verdict, severity chips and a cited RSA-2048 recommendation](images/streamlit_ui.png)
+
+![PQC Audit RAG UI with the Groq hosted provider — masked API key and a detailed ML-KEM / ML-DSA migration plan](images/streamlit_groq.png)
 
 ### Why is it slow? (and how to speed it up)
 

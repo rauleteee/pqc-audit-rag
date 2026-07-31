@@ -48,7 +48,9 @@ src/pqc_audit_rag/
   retrieval.py     # dense Retriever + build_query
   search.py        # TextRetriever, HybridRetriever (RRF), RerankRetriever,
                    #   QueryRewriteRetriever, make_retriever
-  synthesis.py     # FakeSynthesizer (tests) + LLMSynthesizer + prompt styles
+  providers.py     # LLM provider presets (local Ollama, Groq, OpenRouter, OpenAI)
+  synthesis.py     # FakeSynthesizer (tests) + LLMSynthesizer + prompt styles;
+                   #   robust reply parsing (_extract_payload) + TLS verify option
   judge.py         # LLM-as-judge (faithfulness / actionability)
   metrics.py       # Hit Rate / MRR
   pipeline.py      # run_audit(...) orchestrator (+ latency/token metadata)

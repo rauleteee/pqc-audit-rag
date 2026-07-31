@@ -16,6 +16,21 @@ from pathlib import Path
 CORPUS_DIR = Path(__file__).parent / "knowledge_base" / "corpus"
 
 
+def _parse_verify(value: str) -> bool | str:
+    """Parse ``PQC_RAG_LLM_VERIFY``: true/false toggle, or a CA-bundle path.
+
+    ``true`` (default) verifies with certifi; ``false`` skips verification (for
+    trusted internal endpoints with a private/self-signed CA); anything else is
+    treated as a path to a CA bundle to trust.
+    """
+    low = value.strip().lower()
+    if low in ("", "true", "1", "yes", "on"):
+        return True
+    if low in ("false", "0", "no", "off"):
+        return False
+    return value.strip()
+
+
 @dataclass(frozen=True)
 class Settings:
     """Resolved settings. Read once at import as ``settings``."""
@@ -26,8 +41,12 @@ class Settings:
     )
     llm_api_key: str = os.environ.get("OPENAI_API_KEY", "ollama")
     llm_model: str = os.environ.get("PQC_RAG_LLM", "llama3.1")
-    # Cap synthesis output length to keep generation fast on modest hardware.
-    llm_max_tokens: int = int(os.environ.get("PQC_RAG_MAX_TOKENS", "300"))
+    # TLS verification for the LLM endpoint: True | False | path to a CA bundle.
+    # Set PQC_RAG_LLM_VERIFY=false for an internal gateway with a private CA.
+    llm_verify_tls: bool | str = _parse_verify(os.environ.get("PQC_RAG_LLM_VERIFY", "true"))
+    # Cap synthesis output length. High enough that a summary + several steps fit
+    # without the JSON being truncated; lower it (e.g. 300) for faster CPU runs.
+    llm_max_tokens: int = int(os.environ.get("PQC_RAG_MAX_TOKENS", "700"))
 
     # Embeddings: a local ONNX model directory (tokenizer.json + model.onnx).
     embed_model: str = os.environ.get("PQC_RAG_EMBED", "Xenova/all-MiniLM-L6-v2")

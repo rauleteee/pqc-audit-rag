@@ -8,6 +8,7 @@ import sys
 from pqc_audit_rag import monitoring
 from pqc_audit_rag.config import settings
 from pqc_audit_rag.pipeline import run_audit
+from pqc_audit_rag.providers import PROVIDERS
 from pqc_audit_rag.report import to_html, to_markdown
 from pqc_audit_rag.synthesis import FakeSynthesizer, LLMSynthesizer
 
@@ -31,6 +32,28 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     audit.add_argument("--model", default=None, help="LLM model (default from env).")
     audit.add_argument(
+        "--provider",
+        choices=list(PROVIDERS),
+        default=None,
+        help="LLM provider preset (fills base URL + default model); e.g. 'groq'.",
+    )
+    audit.add_argument(
+        "--base-url", default=None, help="OpenAI-compatible base URL (overrides preset)."
+    )
+    audit.add_argument(
+        "--api-key", default=None, help="API key for a hosted provider."
+    )
+    audit.add_argument(
+        "--ca-bundle",
+        default=None,
+        help="Path to a CA bundle to trust (e.g. a company/private root CA).",
+    )
+    audit.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Disable TLS certificate verification (trusted internal endpoints only).",
+    )
+    audit.add_argument(
         "--index",
         default=None,
         help="Path to a persistent LanceDB index (default: build in-memory).",
@@ -52,7 +75,26 @@ def main(argv: list[str] | None = None) -> int:
         ingest.main()
         return 0
 
-    synthesizer = FakeSynthesizer() if args.offline else LLMSynthesizer(model=args.model)
+    base_url, model = args.base_url, args.model
+    if args.provider:
+        preset = PROVIDERS[args.provider]
+        base_url = base_url or preset.base_url
+        model = model or preset.default_model
+    verify_tls: bool | str | None = None
+    if args.ca_bundle:
+        verify_tls = args.ca_bundle
+    elif args.insecure:
+        verify_tls = False
+    synthesizer = (
+        FakeSynthesizer()
+        if args.offline
+        else LLMSynthesizer(
+            model=model or None,
+            base_url=base_url or None,
+            api_key=args.api_key or None,
+            verify_tls=verify_tls,
+        )
+    )
     try:
         report = run_audit(
             args.path,

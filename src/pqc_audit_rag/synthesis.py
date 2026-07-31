@@ -14,6 +14,7 @@ Two implementations behind one ``Synthesizer`` protocol:
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Protocol, runtime_checkable
 
 from pqc_audit_rag.config import settings
@@ -101,6 +102,78 @@ def _system_prompt(style: str) -> str:
     return f"{base} {_JSON_INSTRUCTION}"
 
 
+_SUMMARY_RE = re.compile(r'"summary"\s*:\s*"((?:[^"\\]|\\.)*)"', re.S)
+_STEPS_RE = re.compile(r'"steps"\s*:\s*\[(.*)', re.S)
+_QUOTED_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
+
+
+def _unescape(value: str) -> str:
+    """Turn a raw JSON-string body back into text (handles \\n, \\" …)."""
+    try:
+        return json.loads(f'"{value}"')
+    except json.JSONDecodeError:
+        return value
+
+
+def _extract_payload(content: str) -> tuple[str, list[str]]:
+    """Pull ``(summary, steps)`` from a model reply that may not be clean JSON.
+
+    Handles, in order: a plain JSON object; a ```json fenced object; a JSON object
+    embedded in prose; a **truncated** JSON object (max_tokens cut it off) — the
+    summary and any complete steps are salvaged by regex rather than dumping the
+    raw braces; and, last, free-form prose (used as the summary). A working LLM
+    call therefore never renders raw JSON or an empty recommendation.
+    """
+    text = (content or "").strip()
+    if not text:
+        return "", []
+
+    # Strip a leading ``` or ```json fence, keep what's before the closing fence.
+    if text.startswith("```"):
+        inner = text[3:]
+        if inner[:4].lower() == "json":
+            inner = inner[4:]
+        text = inner.rsplit("```", 1)[0].strip()
+
+    # 1) Well-formed JSON (whole string, or a {...} block embedded in prose).
+    data: Any = None
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        start, end = text.find("{"), text.rfind("}")
+        if start != -1 and end > start:
+            try:
+                data = json.loads(text[start : end + 1])
+            except json.JSONDecodeError:
+                data = None
+
+    if isinstance(data, dict):
+        summary = str(data.get("summary", "")).strip()
+        raw_steps = data.get("steps", [])
+        if isinstance(raw_steps, str):
+            raw_steps = [raw_steps]
+        steps = [str(s).strip() for s in raw_steps if str(s).strip()]
+        if summary or steps:
+            return summary, steps
+
+    # 2) Broken/truncated JSON: salvage the summary and any complete steps.
+    match = _SUMMARY_RE.search(text)
+    if match:
+        summary = _unescape(match.group(1)).strip()
+        steps: list[str] = []
+        steps_match = _STEPS_RE.search(text)
+        if steps_match:
+            steps = [
+                _unescape(s).strip()
+                for s in _QUOTED_RE.findall(steps_match.group(1))
+                if _unescape(s).strip()
+            ]
+        return summary, steps
+
+    # 3) No JSON structure at all — fall back to the raw prose as the summary.
+    return text, []
+
+
 class LLMSynthesizer:
     """LLM synthesizer over any OpenAI-compatible endpoint (Ollama by default)."""
 
@@ -113,19 +186,31 @@ class LLMSynthesizer:
         api_key: str | None = None,
         prompt_style: str | None = None,
         max_tokens: int | None = None,
+        verify_tls: bool | str | None = None,
     ) -> None:
         self.model = model or settings.llm_model
         self.base_url = base_url or settings.llm_base_url
         self.api_key = api_key or settings.llm_api_key
         self.prompt_style = prompt_style or settings.synthesis_prompt
         self.max_tokens = max_tokens or settings.llm_max_tokens
+        # TLS verification: True (default, use certifi), False (skip — insecure,
+        # for trusted internal endpoints), or a path to a CA bundle to trust
+        # (e.g. a company root CA). Needed for self-signed / private-CA gateways.
+        self.verify_tls: bool | str = (
+            settings.llm_verify_tls if verify_tls is None else verify_tls
+        )
         # Token usage captured per call, kept for the monitoring phase.
         self.usages: list[Any] = []
 
     def _client(self):
         from openai import OpenAI
 
-        return OpenAI(base_url=self.base_url, api_key=self.api_key)
+        kwargs: dict[str, Any] = {}
+        if self.verify_tls is not True:
+            import httpx
+
+            kwargs["http_client"] = httpx.Client(verify=self.verify_tls)
+        return OpenAI(base_url=self.base_url, api_key=self.api_key, **kwargs)
 
     def _user_prompt(self, exposure: Exposure, passages: list[Passage]) -> str:
         context = "\n\n".join(
@@ -142,28 +227,48 @@ class LLMSynthesizer:
             "'steps'."
         )
 
+    def _complete(self, messages: list[dict], *, json_format: bool) -> str:
+        """One chat completion; returns the message content (may be empty)."""
+        kwargs: dict[str, Any] = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": 0,
+            "max_tokens": self.max_tokens,
+        }
+        if json_format:
+            kwargs["response_format"] = {"type": "json_object"}
+        response = self._client().chat.completions.create(**kwargs)
+        self.usages.append(getattr(response, "usage", None))
+        if not response.choices:
+            return ""
+        return response.choices[0].message.content or ""
+
     def synthesize(
         self, exposure: Exposure, passages: list[Passage]
     ) -> MigrationRecommendation:
-        response = self._client().chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": _system_prompt(self.prompt_style)},
-                {"role": "user", "content": self._user_prompt(exposure, passages)},
-            ],
-            response_format={"type": "json_object"},
-            temperature=0,
-            max_tokens=self.max_tokens,
-        )
-        self.usages.append(getattr(response, "usage", None))
-        data = json.loads(response.choices[0].message.content or "{}")
+        messages = [
+            {"role": "system", "content": _system_prompt(self.prompt_style)},
+            {"role": "user", "content": self._user_prompt(exposure, passages)},
+        ]
+        # Ask for a JSON object first. Many gateways / non-OpenAI models behind a
+        # proxy (e.g. LiteLLM) either reject the response_format param or return an
+        # empty body for it, so on empty/error we retry as plain text and parse
+        # leniently — the user should always get prose, never an empty card.
+        try:
+            content = self._complete(messages, json_format=True)
+        except Exception:
+            content = ""
+        if not content.strip():
+            content = self._complete(messages, json_format=False)
+
+        summary, steps = _extract_payload(content)
         return MigrationRecommendation(
             algorithm=exposure.algorithm,
             usage=exposure.usage,
             severity=exposure.severity,
             migration_target=exposure.migration_target,
-            summary=str(data.get("summary", "")),
-            steps=[str(s) for s in data.get("steps", [])],
+            summary=summary,
+            steps=steps,
             citations=_citations(passages),
         )
 

@@ -20,6 +20,7 @@ from pqc_audit_rag.config import settings
 from pqc_audit_rag.feedback import record_feedback
 from pqc_audit_rag.models import AuditReport
 from pqc_audit_rag.pipeline import run_audit
+from pqc_audit_rag.providers import DEFAULT_PROVIDER, PROVIDERS
 from pqc_audit_rag.synthesis import FakeSynthesizer, LLMSynthesizer
 
 TONE = {"CRITICAL": "#d12d2d", "MEDIUM": "#c77800", "INFO": "#1f7ab5", "clean": "#2e7d32"}
@@ -158,34 +159,62 @@ def main() -> None:
                 st.caption(EXAMPLE_DESCRIPTIONS[choice])
         mode = st.radio(
             "Synthesis",
-            ["LLM (Ollama)", "Offline (deterministic)"],
-            help="LLM needs a running Ollama server; Offline needs nothing.",
+            ["LLM", "Offline (deterministic)"],
+            help="LLM calls a model (local Ollama or a hosted API); "
+            "Offline is deterministic and needs nothing.",
         )
-        model = st.text_input("LLM model", value=settings.llm_model)
-        with st.expander("Hosted LLM (optional — use OpenAI/Groq, not local Ollama)"):
-            base_url = st.text_input("Base URL", value=settings.llm_base_url)
-            api_key = st.text_input(
-                "API key",
-                value="",
-                type="password",
-                help="For a hosted OpenAI-compatible API. Leave blank for local "
-                "Ollama. Used only for the request, never stored.",
-            )
-            st.caption(
-                "A hosted model is much faster than CPU Ollama, and priced models "
-                "(e.g. gpt-4o-mini) populate the monitoring cost panel. Remember "
-                "to set a matching model name above."
-            )
+        provider_key = st.selectbox(
+            "LLM provider",
+            list(PROVIDERS),
+            index=list(PROVIDERS).index(DEFAULT_PROVIDER),
+            format_func=lambda k: PROVIDERS[k].label,
+            help="Local Ollama (free, slow) or a remote OpenAI-compatible API.",
+        )
+        provider = PROVIDERS[provider_key]
+        base_url = st.text_input("Base URL", value=provider.base_url)
+        model = st.text_input(
+            "LLM model", value=provider.default_model or settings.llm_model
+        )
+        api_key = st.text_input(
+            "API key" if provider.needs_key else "API key (optional)",
+            value="",
+            type="password",
+            help="Used only for this request, never stored. Leave blank for "
+            "local Ollama or a keyless endpoint.",
+        )
         st.caption(
-            "Local Ollama runs on CPU — expect a few seconds per finding. Use "
-            "Offline for an instant preview, or a hosted model above for speed."
+            "🔒 Masked and kept only in this browser session — never written to "
+            "disk, database or logs."
         )
+        if provider.needs_key and provider.signup:
+            st.caption(f"Get a free key → {provider.signup}")
+        if provider.note:
+            st.caption(provider.note)
+
+        verify_tls: bool | str = True
+        with st.expander("Advanced — TLS (internal / self-signed endpoints)"):
+            ca_bundle = st.text_input(
+                "CA bundle path (recommended for a private CA)", value=""
+            )
+            insecure = st.checkbox(
+                "Disable TLS certificate verification (insecure)", value=False,
+                help="Only for a trusted internal endpoint whose CA this machine "
+                "does not know. Prefer the CA bundle path above.",
+            )
+            if ca_bundle.strip():
+                verify_tls = ca_bundle.strip()
+            elif insecure:
+                verify_tls = False
         method = st.selectbox(
             "Retrieval method",
             ["rerank", "hybrid", "dense", "text"],
             help="Evaluated in evaluation/RESULTS.md; 'rerank' scored best.",
         )
         top_k = st.slider("Retrieved passages (top-k)", 1, 8, settings.top_k)
+        max_tokens = st.slider(
+            "Max output tokens", 200, 1200, settings.llm_max_tokens, step=50,
+            help="Higher = fuller steps, slower. Too low truncates the guidance.",
+        )
         run = st.button("Run audit", type="primary", use_container_width=True)
 
     if run:
@@ -201,6 +230,8 @@ def main() -> None:
                 model=model,
                 base_url=base_url or None,
                 api_key=api_key or None,
+                verify_tls=verify_tls,
+                max_tokens=max_tokens,
             )
         )
         try:
@@ -221,10 +252,15 @@ def main() -> None:
                 )
                 status.update(label="Audit complete", state="complete", expanded=False)
         except Exception as exc:  # pragma: no cover - UI convenience
+            endpoint = getattr(synthesizer, "base_url", settings.llm_base_url)
+            used_model = getattr(synthesizer, "model", "")
             st.error(
-                f"LLM synthesis failed: {exc}\n\nIs the LLM endpoint up "
-                f"(base_url={settings.llm_base_url})? Pull a model with "
-                "`ollama pull llama3.1`, or switch to Offline mode."
+                f"LLM synthesis failed: {exc}\n\n"
+                f"Endpoint actually used: `{endpoint}`  ·  model: `{used_model}`\n\n"
+                "Check that the **Base URL** is OpenAI-compatible (usually ends in "
+                "`/v1`), the **model** name matches one the endpoint serves, and "
+                "that the host is reachable from this machine (VPN / firewall?). "
+                "Or switch to Offline mode."
             )
             return
         st.session_state["report"] = report

@@ -8,12 +8,15 @@ standards, migration mappings, regulatory timelines) and an LLM synthesizes a
 cited, per-finding migration recommendation.
 
 Built for the **LLM Zoomcamp** final project. Runs on a **100% free, local
-stack** — no paid API keys required:
+stack** by default (no paid API keys) — and can point at any hosted
+OpenAI-compatible API (OpenAI, Groq, a company gateway…) when you want speed:
 
 - **Detection:** [`pqc-audit`](https://pypi.org/project/pqc-audit/) (OSS engine).
-- **LLM:** [Ollama](https://ollama.com) (local, free).
-- **Embeddings:** `sentence-transformers` (local), with a dependency-free hashing
-  fallback so the package and tests run offline.
+- **LLM:** [Ollama](https://ollama.com) (local, free) by default, or any hosted
+  OpenAI-compatible endpoint.
+- **Embeddings:** ONNX MiniLM (`onnxruntime` + `tokenizers`, `all-MiniLM-L6-v2`)
+  — local, no torch, with a dependency-free hashing fallback so the package and
+  tests run offline.
 - **Vector store:** LanceDB (on-disk) / in-memory.
 
 ## The problem
@@ -42,14 +45,15 @@ flowchart TB
     orch["Orchestrator<br/>(run_audit)"]
     engine["Detection engine<br/>(pqc-audit)"]
     report["Report<br/>(Markdown / HTML)"]
-    feedback["Feedback store<br/>(JSONL)"]
+    feedback["Feedback store<br/>(Postgres / JSONL)"]
+    monitor["Monitoring<br/>(Postgres + Grafana)"]
 
     subgraph rag["Retrieval-augmented generation"]
         retriever["Retriever<br/>(hybrid + rerank + rewrite)"]
         synth["LLM synthesizer"]
     end
 
-    llm["LLM runtime<br/>(Ollama · llama3.1)"]
+    llm["LLM runtime<br/>(Ollama or any<br/>OpenAI-compatible API)"]
 
     subgraph kbase["Knowledge base"]
         corpus["Corpus<br/>(Markdown + sources)"]
@@ -68,6 +72,8 @@ flowchart TB
     orch --> retriever
     orch --> synth
     orch --> report
+    orch --> monitor
+    feedback --> monitor
     retriever --> vstore
     retriever --> kindex
     synth --> llm
@@ -82,10 +88,12 @@ flowchart TB
     classDef kbc fill:#eef7ee,stroke:#2e7d32,color:#14471a;
     classDef llmc fill:#fdf0e6,stroke:#c77800,color:#5c3a00;
     classDef evalc fill:#f4eef9,stroke:#7a4fb5,color:#3a2159;
+    classDef monc fill:#fdeaea,stroke:#c0392b,color:#5c1a1a;
     class cli,ui iface;
     class corpus,ingest,embed,vstore,kindex kbc;
     class llm,synth llmc;
     class evalz evalc;
+    class monitor monc;
 ```
 
 **Components**
@@ -101,8 +109,9 @@ flowchart TB
 | Embeddings | ONNX MiniLM (`all-MiniLM-L6-v2`) — local, no torch |
 | Vector store | LanceDB (on-disk) or in-memory |
 | Keyword index | minsearch |
-| LLM synthesizer | writes the cited migration plan grounded in retrieved passages |
-| LLM runtime | Ollama running `llama3.1`, via the OpenAI-compatible API |
+| LLM synthesizer | writes the cited migration plan grounded in retrieved passages; robust reply parsing (fenced / embedded / truncated JSON) |
+| LLM runtime | Ollama (default `llama3.1`) **or** any hosted OpenAI-compatible API (OpenAI, Groq, OpenRouter, a company gateway) |
+| LLM provider | preset selector in `providers.py` (base URL + model) with a TLS-verify option for private-CA / self-signed gateways |
 | Report | Markdown / HTML |
 | Feedback store | thumbs up/down persisted to Postgres (JSONL fallback) |
 | Monitoring | Postgres metrics store + provisioned Grafana dashboard |
@@ -143,6 +152,10 @@ feedback. **Offline mode** in the sidebar runs everything except the LLM (instan
 no Ollama needed). The **LLM provider** selector switches between local Ollama and
 a hosted OpenAI-compatible API (see below).
 
+**New to the UI?** See the **[UI guide](docs/ui-guide.md)** — every sidebar
+control, running an audit, reading the report, hosted providers and TLS, and
+troubleshooting.
+
 Same app, two backends — a local Ollama model, and a hosted Groq model returning a
 fuller cited migration plan:
 
@@ -176,10 +189,26 @@ PQC_RAG_LLM=llama3.2:3b PQC_RAG_MAX_TOKENS=280 streamlit run app/streamlit_app.p
 ### Using a hosted LLM instead of local Ollama
 
 The synthesizer talks to **any OpenAI-compatible endpoint**, so you can swap the
-free local Ollama for a hosted API (OpenAI, Groq, Together, a company gateway…) —
-much faster than CPU inference — by setting three env vars, no code change:
+free local Ollama for a hosted API (OpenAI, Groq, OpenRouter, a company gateway…) —
+much faster than CPU inference — with no code change.
+
+**In the UI:** the sidebar **LLM provider** selector offers *Local Ollama*, *Groq*,
+*OpenRouter*, *OpenAI* and *Custom*; picking one fills the **Base URL** and a
+default **model**, and reveals a masked **API key** field (used only for the
+request, never stored). Screenshots above show the local Ollama and Groq runs.
+
+**On the CLI:** use `--provider` (or `--base-url`) plus `--api-key`:
 
 ```bash
+# Groq (free) — get a key at https://console.groq.com/keys
+pqc-audit-rag audit examples/vulnerable_sample.py \
+  --provider groq --api-key "$GROQ_API_KEY" --md
+
+# OpenAI
+pqc-audit-rag audit examples/vulnerable_sample.py \
+  --provider openai --model gpt-4o-mini --api-key "$OPENAI_API_KEY" --md
+
+# ...or via env vars, for any OpenAI-compatible endpoint:
 export OPENAI_BASE_URL=https://api.openai.com/v1
 export OPENAI_API_KEY=sk-...
 export PQC_RAG_LLM=gpt-4o-mini
@@ -188,12 +217,17 @@ pqc-audit-rag audit examples/vulnerable_sample.py --md
 
 Hosted models have a known per-token price, so the monitoring **cost** panel fills
 in (see `PRICES` / `calc_cost` in `monitoring.py`; `gpt-4o-mini`, `gpt-4o`,
-`gpt-4.1`… are priced, local/unknown models read $0). The Streamlit sidebar has an
-optional **Hosted LLM** section (Base URL / API key) for the same thing without
-touching the environment. Your key is only used for that request and never stored.
+`gpt-4.1`… are priced, local/unknown models read $0).
+
+**Internal / self-signed gateways.** If your company endpoint uses a private CA,
+verification will fail (`Connection error`). Point at the company CA bundle
+(secure) or disable verification (trusted internal endpoints only): in the UI use
+the sidebar **Advanced — TLS** section; on the CLI use `--ca-bundle /path/ca.pem`
+or `--insecure`; or set `PQC_RAG_LLM_VERIFY=false` (or a CA path).
 
 Key environment variables: `OPENAI_BASE_URL` (default `http://localhost:11434/v1`),
-`OPENAI_API_KEY` (default `ollama`), `PQC_RAG_LLM`, `PQC_RAG_MAX_TOKENS`,
+`OPENAI_API_KEY` (default `ollama`), `PQC_RAG_LLM`, `PQC_RAG_MAX_TOKENS`
+(default `700`), `PQC_RAG_LLM_VERIFY` (`true` | `false` | CA-bundle path),
 `PQC_RAG_RETRIEVAL` (dense|text|hybrid|rerank), `PQC_RAG_PROMPT`, `PQC_RAG_TOPK`,
 `PQC_RAG_PG_DSN` (Postgres DSN for monitoring; unset = disabled).
 

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pqc-audit-rag"
 dynamic = ["version"]
-description = "RAG/agent app that turns a pqc-audit crypto inventory into actionable post-quantum migration guidance, using a free local stack (Ollama + sentence-transformers)."
+description = "RAG/agent app that turns a pqc-audit crypto inventory into actionable post-quantum migration guidance, using a free local stack (Ollama + ONNX embeddings) or any hosted OpenAI-compatible API."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

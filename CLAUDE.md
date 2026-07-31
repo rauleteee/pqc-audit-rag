@@ -68,6 +68,8 @@ examples/                # sample projects for the demo / UI picker
 tests/                   # 34 tests, all offline (no Ollama / no network / no DB)
 monitoring/              # docker-compose (Postgres + Grafana), schema.sql,
                          #   grafana/ provisioning + pqc_rag.json dashboard
+docs/                    # ui-guide.md (how to use the Streamlit app)
+images/                  # README screenshots (UI + Grafana)
 ```
 
 ## Running
@@ -104,9 +106,34 @@ then `streamlit run app/streamlit_app.py`.
   and a provisioned Grafana dashboard (`pqc_rag.json`, **11 panels / 7 charts**:
   audits over time, severity mix, feedback, tokens & cost, latency, method/prompt
   usage table, top algorithms). Verified end-to-end against the live stack.
+- **LLM providers + robustness (post-phase-6, this session).** The synthesizer now
+  works against local Ollama **and** any hosted OpenAI-compatible API. New
+  `providers.py` (presets: local Ollama / Groq / OpenRouter / OpenAI / custom),
+  wired into the Streamlit sidebar (provider selector + Base URL + model + masked
+  API-key field that is never stored + `Advanced — TLS` + max-tokens slider) and
+  the CLI (`--provider/--base-url/--api-key/--ca-bundle/--insecure`). Internal /
+  self-signed gateways: `LLMSynthesizer(verify_tls=True|False|ca_path)` +
+  `PQC_RAG_LLM_VERIFY`; needed because httpx/certifi doesn't trust a company's
+  private CA (curl does) → surfaced as `Connection error`. Reply parsing is now
+  robust (`_extract_payload`): handles fenced JSON, JSON embedded in prose, and
+  **truncated** JSON (salvages summary + complete steps instead of dumping raw
+  braces); on an empty `json_object` reply it retries without the format hint.
+  Default `PQC_RAG_MAX_TOKENS` raised 300 → 700 (was truncating guidance).
+  **Verified live by the user with a company LiteLLM gateway (private CA,
+  `--insecure`) and with Groq** — both render clean summaries + steps.
+- **Docs/README refresh (this session).** README corrected (was stale:
+  sentence-transformers → ONNX embeddings; "Hosted LLM section" → provider
+  selector; diagram feedback → Postgres/JSONL + a Monitoring node; env-var list +
+  `PQC_RAG_LLM_VERIFY`; hosted CLI examples; two UI screenshots). New `docs/`
+  folder: `ui-guide.md` (full sidebar walkthrough + hosted providers + TLS +
+  troubleshooting), linked from the README.
 
 Rubric best practices covered: **hybrid search, re-ranking, query rewriting** (all
 in `search.py`, all evaluated).
+
+**Tests:** 48 offline (no Ollama/ONNX/network/DB). New this session:
+`test_providers.py`, `test_tls.py`, `test_synthesis_parse.py` (incl. truncated-JSON
+salvage), `test_monitoring.py`.
 
 ## Next steps
 
@@ -124,6 +151,12 @@ in `search.py`, all evaluated).
   `PQC_RAG_MAX_TOKENS=280`; Offline mode needs no LLM. Ollama runs as a **systemd
   service** (`systemctl {status,stop} ollama`).
 - **Eval scripts are slow** (LLM per item) — launch them in the background.
+- **Restarting Streamlit:** kill by port, not `pkill -f "streamlit run"` — the
+  pattern matches the launcher shell itself and self-kills. Use
+  `kill $(ss -ltnp | grep :8501 | grep -oP 'pid=\K[0-9]+')`, then relaunch.
+- **Hosted `Connection error`** on an internal endpoint = TLS: httpx/certifi
+  doesn't trust the private CA (curl, using the system store, does). Fix with a CA
+  bundle or `--insecure` / TLS-verify off (see the LLM-providers note above).
 - **Ground truth** (`evaluation/ground_truth.json`) is LLM-generated and
   committed for reproducibility; regenerate with `generate_ground_truth.py`
   (`PQC_RAG_QPC` = questions/chunk).

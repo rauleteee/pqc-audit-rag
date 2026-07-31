@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from pqc_audit_rag import monitoring
 from pqc_audit_rag.config import settings
 from pqc_audit_rag.pipeline import run_audit
 from pqc_audit_rag.report import to_html, to_markdown
@@ -69,6 +70,9 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 1
         raise
+
+    # Best-effort: persist the run for monitoring (no-op without PQC_RAG_PG_DSN).
+    monitoring.record_run(report)
 
     print(to_html(report) if args.html else to_markdown(report))
     return 0

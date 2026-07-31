@@ -44,5 +44,9 @@ class Settings:
     # (evaluation/evaluate_llm.py) picks the best.
     synthesis_prompt: str = os.environ.get("PQC_RAG_PROMPT", "concise")
 
+    # Monitoring: Postgres DSN for persisting audits + feedback (Grafana source).
+    # Empty by default -> monitoring is a no-op (the free stack needs no server).
+    pg_dsn: str = os.environ.get("PQC_RAG_PG_DSN", "")
+
 
 settings = Settings()

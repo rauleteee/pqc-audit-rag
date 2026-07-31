@@ -7,6 +7,7 @@ migration knowledge base (RAG), orchestration and reporting.
 from __future__ import annotations
 
 from pqc_audit_rag.grouping import group_exposures
+from pqc_audit_rag.monitoring import record_run
 from pqc_audit_rag.models import (
     AuditReport,
     Exposure,
@@ -42,6 +43,7 @@ __all__ = [
     "OllamaSynthesizer",
     "to_markdown",
     "to_html",
+    "record_run",
     "Exposure",
     "Passage",
     "MigrationRecommendation",

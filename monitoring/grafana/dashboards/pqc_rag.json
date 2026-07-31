@@ -1,0 +1,156 @@
+{
+  "uid": "pqc-audit-rag",
+  "title": "PQC Audit RAG",
+  "tags": ["pqc", "rag", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "10s",
+  "time": { "from": "now-24h", "to": "now" },
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Audits run",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "format": "table", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT count(*) AS audits FROM audit_run;" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Findings detected",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "format": "table", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT coalesce(sum(total), 0) AS findings FROM audit_run;" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Avg latency (ms)",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 3000 }] } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "format": "table", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT coalesce(round(avg(latency_ms)::numeric, 0), 0) AS latency FROM audit_run;" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Tokens used",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "format": "table", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT coalesce(sum(total_tokens), 0) AS tokens FROM audit_run;" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Audits over time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 60, "lineWidth": 1 }, "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "format": "time_series", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT $__timeGroupAlias(ts, '1m'), count(*) AS audits FROM audit_run WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1;" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "piechart",
+      "title": "Severity mix",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "pieType": "donut", "legend": { "displayMode": "list", "placement": "bottom", "values": ["value"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [
+        { "matcher": { "id": "byName", "options": "CRITICAL" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+        { "matcher": { "id": "byName", "options": "MEDIUM" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+        { "matcher": { "id": "byName", "options": "INFO" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }
+      ] },
+      "targets": [
+        { "refId": "A", "format": "table", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT coalesce(sum(critical), 0) AS \"CRITICAL\", coalesce(sum(medium), 0) AS \"MEDIUM\", coalesce(sum(info), 0) AS \"INFO\" FROM audit_run;" }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "piechart",
+      "title": "User feedback",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "pieType": "pie", "legend": { "displayMode": "list", "placement": "bottom", "values": ["value"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [
+        { "matcher": { "id": "byName", "options": "helpful" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+        { "matcher": { "id": "byName", "options": "not useful" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+      ] },
+      "targets": [
+        { "refId": "A", "format": "table", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT count(*) FILTER (WHERE rating = 'up') AS \"helpful\", count(*) FILTER (WHERE rating = 'down') AS \"not useful\" FROM feedback;" }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Tokens & estimated cost over time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 2 }, "color": { "mode": "palette-classic" } }, "overrides": [
+        { "matcher": { "id": "byName", "options": "cost (USD)" }, "properties": [{ "id": "unit", "value": "currencyUSD" }, { "id": "custom.axisPlacement", "value": "right" }] }
+      ] },
+      "targets": [
+        { "refId": "A", "format": "time_series", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT $__timeGroupAlias(ts, '1m'), sum(total_tokens) AS tokens, sum(cost_usd) AS \"cost (USD)\" FROM audit_run WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1;" }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Latency over time",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2 }, "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "format": "time_series", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT $__timeGroupAlias(ts, '1m'), avg(latency_ms) AS \"avg latency (ms)\", max(latency_ms) AS \"max latency (ms)\" FROM audit_run WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1;" }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Usage by retrieval method & prompt style",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "showHeader": true },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "format": "table", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT retrieval_method AS \"method\", prompt_style AS \"prompt\", generated_by AS \"synthesizer\", count(*) AS \"audits\", round(avg(latency_ms)::numeric, 0) AS \"avg latency (ms)\", sum(total_tokens) AS \"tokens\" FROM audit_run GROUP BY 1, 2, 3 ORDER BY 4 DESC;" }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "barchart",
+      "title": "Top exposed algorithms",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "pqc_pg" },
+      "options": { "orientation": "horizontal", "xField": "algorithm", "legend": { "showLegend": false }, "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "continuous-BlPu" } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "format": "table", "datasource": { "type": "postgres", "uid": "pqc_pg" }, "rawQuery": true, "rawSql": "SELECT algorithm, count(*) AS exposures FROM audit_exposure GROUP BY algorithm ORDER BY exposures DESC LIMIT 10;" }
+      ]
+    }
+  ]
+}

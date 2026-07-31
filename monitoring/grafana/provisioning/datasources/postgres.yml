@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: PQC-RAG Postgres
+    uid: pqc_pg
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    user: pqc
+    isDefault: true
+    jsonData:
+      database: pqc_rag
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    secureJsonData:
+      password: pqc

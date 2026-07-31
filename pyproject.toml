@@ -32,6 +32,8 @@ llm = ["openai>=1.40"]
 app = ["streamlit>=1.36"]
 # Course-aligned automated ingestion via dlt (loads the corpus into DuckDB).
 ingest = ["dlt[duckdb]>=1.0"]
+# Monitoring: persist audits + feedback to Postgres (Grafana dashboard source).
+monitoring = ["psycopg[binary]>=3.1"]
 dev = ["pytest>=7.0"]
 
 [project.scripts]

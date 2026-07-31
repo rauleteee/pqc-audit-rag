@@ -51,9 +51,10 @@ src/pqc_audit_rag/
   synthesis.py     # FakeSynthesizer (tests) + LLMSynthesizer + prompt styles
   judge.py         # LLM-as-judge (faithfulness / actionability)
   metrics.py       # Hit Rate / MRR
-  pipeline.py      # run_audit(...) orchestrator (+ on_event progress callback)
+  pipeline.py      # run_audit(...) orchestrator (+ latency/token metadata)
   report.py        # to_markdown / to_html
-  feedback.py      # record_feedback (JSONL)
+  feedback.py      # record_feedback (Postgres if configured, else JSONL)
+  monitoring.py    # best-effort Postgres persistence (audit_run/exposure/feedback)
   cli.py           # pqc-audit-rag audit|ingest
   knowledge_base/  # corpus/*.md, embedder (ONNX + hashing fallback), store
                    #   (LanceDB + in-memory), ingest, download_model
@@ -62,7 +63,9 @@ evaluation/              # ground_truth.json, evaluate_retrieval.py, evaluate_ll
                          #   generate_ground_truth.py, RESULTS.md, LLM_RESULTS.md
 ingestion/dlt_pipeline.py  # course-aligned dlt -> DuckDB ingestion
 examples/                # sample projects for the demo / UI picker
-tests/                   # 27 tests, all offline (no Ollama / no network)
+tests/                   # 34 tests, all offline (no Ollama / no network / no DB)
+monitoring/              # docker-compose (Postgres + Grafana), schema.sql,
+                         #   grafana/ provisioning + pqc_rag.json dashboard
 ```
 
 ## Running
@@ -76,6 +79,10 @@ then `streamlit run app/streamlit_app.py`.
   synthesizer). No Ollama/ONNX/network needed.
 - Evaluations (need Ollama): `python evaluation/generate_ground_truth.py`,
   `python evaluation/evaluate_llm.py`, `python evaluation/evaluate_retrieval.py`.
+- Monitoring: `docker compose -f monitoring/docker-compose.yml up -d`, then
+  `export PQC_RAG_PG_DSN=postgresql://pqc:pqc@localhost:5432/pqc_rag` and run
+  audits. Grafana at `http://localhost:3000` (dashboard "PQC Audit RAG";
+  anonymous viewing, admin/admin). Needs the `monitoring` extra (`psycopg`).
 
 ## Current state — phases done
 
@@ -86,19 +93,20 @@ then `streamlit run app/streamlit_app.py`.
 - **4** LLM evaluation (3 prompt styles vs LLM-as-judge). Winner `concise`. +
   query-rewriting best practice. → `LLM_RESULTS.md`.
 - **5** Streamlit UI + user feedback.
+- **6** monitoring (Postgres + Grafana). `monitoring.py` persists every audit
+  (`audit_run` + per-exposure `audit_exposure`) and feedback to Postgres,
+  best-effort (no-op without `PQC_RAG_PG_DSN`; never breaks an audit). Pipeline
+  now captures latency + token usage; `calc_cost` prices hosted models (local
+  Ollama = $0). `feedback.py` writes Postgres when configured, JSONL otherwise.
+  `monitoring/` ships `docker-compose.yml` (Postgres + Grafana), `schema.sql`,
+  and a provisioned Grafana dashboard (`pqc_rag.json`, **11 panels / 7 charts**:
+  audits over time, severity mix, feedback, tokens & cost, latency, method/prompt
+  usage table, top algorithms). Verified end-to-end against the live stack.
 
 Rubric best practices covered: **hybrid search, re-ranking, query rewriting** (all
 in `search.py`, all evaluated).
 
 ## Next steps
-
-### Phase 6 — Monitoring (Postgres + Grafana)
-- Persist each audit/answer to **Postgres**: timestamp, scanned path, exposure,
-  retrieval method, prompt style, tokens + estimated cost + latency, and the
-  👍/👎 feedback. Migrate `feedback.py` from JSONL to Postgres (keep the same
-  record shape). Capture `LLMSynthesizer.usages` (tokens) for cost.
-- **Grafana** dashboard with **≥5 charts** (e.g. audits over time, severity mix,
-  feedback rate, tokens/cost, latency, method/prompt usage).
 
 ### Phase 7 — Containerization + reproducibility
 - `docker-compose` for **everything**: app (Streamlit), Postgres, Grafana, and
@@ -121,4 +129,9 @@ in `search.py`, all evaluated).
   is already set (the machine's global identity is different).
 - **Real source PDFs** (NIST, CCN-STIC, BSI, ANSSI) are intentionally out of scope
   here; they belong to the separate `pqc-audit-pro` product.
+- **Monitoring is best-effort.** All `monitoring.py` calls no-op (return
+  `None`/`False`) without `PQC_RAG_PG_DSN` or if the DB is unreachable — an audit
+  never fails because of the metrics store. `SCHEMA_SQL` (in `monitoring.py`) and
+  `monitoring/schema.sql` are kept in sync by hand. Grafana panels use Postgres
+  macros (`$__timeGroupAlias`, `$__timeFilter`); the datasource has `uid: pqc_pg`.
 ```

@@ -15,6 +15,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from pqc_audit_rag import monitoring
 from pqc_audit_rag.config import settings
 from pqc_audit_rag.feedback import record_feedback
 from pqc_audit_rag.models import AuditReport
@@ -118,12 +119,13 @@ def _render_report(report: AuditReport) -> None:
 def _feedback(report: AuditReport) -> None:
     st.divider()
     st.caption("Was this migration report useful?")
+    run_id = st.session_state.get("run_id")
     col_up, col_down, _ = st.columns([1, 1, 6])
     if col_up.button("👍 Helpful", use_container_width=True):
-        record_feedback(report, "up")
+        record_feedback(report, "up", run_id=run_id)
         st.toast("Thanks for the feedback!")
     if col_down.button("👎 Not useful", use_container_width=True):
-        record_feedback(report, "down")
+        record_feedback(report, "down", run_id=run_id)
         st.toast("Thanks — we'll use this to improve.")
 
 
@@ -160,9 +162,23 @@ def main() -> None:
             help="LLM needs a running Ollama server; Offline needs nothing.",
         )
         model = st.text_input("LLM model", value=settings.llm_model)
+        with st.expander("Hosted LLM (optional — use OpenAI/Groq, not local Ollama)"):
+            base_url = st.text_input("Base URL", value=settings.llm_base_url)
+            api_key = st.text_input(
+                "API key",
+                value="",
+                type="password",
+                help="For a hosted OpenAI-compatible API. Leave blank for local "
+                "Ollama. Used only for the request, never stored.",
+            )
+            st.caption(
+                "A hosted model is much faster than CPU Ollama, and priced models "
+                "(e.g. gpt-4o-mini) populate the monitoring cost panel. Remember "
+                "to set a matching model name above."
+            )
         st.caption(
-            "LLM synthesis runs locally on CPU — expect a few seconds per finding. "
-            "Use Offline for an instant preview."
+            "Local Ollama runs on CPU — expect a few seconds per finding. Use "
+            "Offline for an instant preview, or a hosted model above for speed."
         )
         method = st.selectbox(
             "Retrieval method",
@@ -178,7 +194,15 @@ def main() -> None:
             st.error(f"Path not found: {target}")
             return
         offline = mode.startswith("Offline")
-        synthesizer = FakeSynthesizer() if offline else LLMSynthesizer(model=model)
+        synthesizer = (
+            FakeSynthesizer()
+            if offline
+            else LLMSynthesizer(
+                model=model,
+                base_url=base_url or None,
+                api_key=api_key or None,
+            )
+        )
         try:
             with st.status("Running audit…", expanded=True) as status:
                 bar = st.progress(0.0)
@@ -204,6 +228,8 @@ def main() -> None:
             )
             return
         st.session_state["report"] = report
+        # Best-effort: persist for monitoring (no-op without PQC_RAG_PG_DSN).
+        st.session_state["run_id"] = monitoring.record_run(report)
 
     report = st.session_state.get("report")
     if report is not None:

@@ -7,6 +7,7 @@ knowledge lives in the corpus, and detection is delegated to ``pqc-audit``.
 
 from __future__ import annotations
 
+import time
 from collections import Counter
 from collections.abc import Callable
 
@@ -73,6 +74,7 @@ def run_audit(
         )
 
     synthesizer = synthesizer or FakeSynthesizer()
+    started = time.perf_counter()
 
     emit(f"Scanning {path} for vulnerable cryptography…", 0.05)
     findings = scan(path)
@@ -103,6 +105,15 @@ def run_audit(
 
     emit("Building report…", 1.0)
     counts = Counter(f.severity.value for f in findings)
+    latency_ms = (time.perf_counter() - started) * 1000.0
+
+    # Aggregate token usage captured by the LLM synthesizer (empty for the
+    # deterministic FakeSynthesizer, which exposes no ``usages``).
+    usages = getattr(synthesizer, "usages", None) or []
+
+    def _tok(field: str) -> int:
+        return sum(int(getattr(u, field, 0) or 0) for u in usages)
+
     return AuditReport(
         path=str(path),
         verdict=_verdict(counts),
@@ -114,4 +125,12 @@ def run_audit(
         },
         recommendations=recommendations,
         generated_by=synthesizer.name,
+        model=getattr(synthesizer, "model", ""),
+        retrieval_method=method or settings.retrieval_method,
+        prompt_style=getattr(synthesizer, "prompt_style", ""),
+        top_k=top_k,
+        latency_ms=latency_ms,
+        prompt_tokens=_tok("prompt_tokens"),
+        completion_tokens=_tok("completion_tokens"),
+        total_tokens=_tok("total_tokens"),
     )

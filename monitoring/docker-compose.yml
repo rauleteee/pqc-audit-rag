@@ -1,0 +1,51 @@
+# Monitoring stack for PQC Audit RAG: Postgres (metrics store) + Grafana
+# (dashboard). Bring it up, point the app at it, and open Grafana:
+#
+#   docker compose -f monitoring/docker-compose.yml up -d
+#   export PQC_RAG_PG_DSN=postgresql://pqc:pqc@localhost:5432/pqc_rag
+#   # run audits (CLI or Streamlit) -> rows land in Postgres
+#   open http://localhost:3000   # Grafana, dashboard "PQC Audit RAG"
+#
+# Grafana allows anonymous viewing; admin login is admin/admin.
+
+name: pqc-audit-rag-monitoring
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pqc
+      POSTGRES_PASSWORD: pqc
+      POSTGRES_DB: pqc_rag
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pqc -d pqc_rag"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_DEFAULT_THEME: light
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  grafana-data:

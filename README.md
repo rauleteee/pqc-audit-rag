@@ -26,9 +26,9 @@ app closes that loop — inventory → retrieved guidance → concrete migration
 
 ## Status
 
-Early build. **Phase 0–1 done:** repo scaffold + RAG core (scan → group
-exposures → retrieve → synthesize → report) with a testable synthesizer seam and
-a seeded public corpus. See the roadmap below.
+Working end-to-end. **Phases 0–6 done:** RAG core (scan → group exposures →
+retrieve → synthesize → report), automated ingestion, retrieval + LLM evaluation,
+a Streamlit UI, and a Postgres + Grafana monitoring stack. See the roadmap below.
 
 ## Architecture
 
@@ -104,7 +104,8 @@ flowchart TB
 | LLM synthesizer | writes the cited migration plan grounded in retrieved passages |
 | LLM runtime | Ollama running `llama3.1`, via the OpenAI-compatible API |
 | Report | Markdown / HTML |
-| Feedback store | thumbs up/down persisted as JSONL (monitoring seed) |
+| Feedback store | thumbs up/down persisted to Postgres (JSONL fallback) |
+| Monitoring | Postgres metrics store + provisioned Grafana dashboard |
 | Evaluation | retrieval (Hit Rate / MRR) + LLM-as-judge (faithfulness / actionability) |
 
 The LLM only synthesizes prose; the control flow is deterministic code.
@@ -141,18 +142,52 @@ per-exposure cards with cited migration guidance, live progress, and 👍/👎
 feedback. **Offline mode** in the sidebar runs everything except the LLM (instant,
 no Ollama needed).
 
-**On modest / CPU-only hardware** LLM synthesis is slow (a few seconds per
-finding). Use a smaller model and cap the output:
+### Why is it slow? (and how to speed it up)
+
+By default the LLM runs **locally on CPU** via Ollama — free and private, but
+slow. In the monitoring screenshots a full scan of the kitchen-sink example took
+~3 minutes. The latency comes entirely from LLM token generation, not from the
+scan or retrieval (those are milliseconds):
+
+- **CPU-only inference.** With no GPU, every generated token is CPU matrix math.
+  A GPU (Ollama uses it automatically) is an order of magnitude faster.
+- **One synthesis call per exposure, run sequentially.** A repo with many
+  distinct exposures makes many LLM calls back-to-back.
+- **Output length and model size.** Each call generates up to
+  `PQC_RAG_MAX_TOKENS` tokens; an 8B model (`llama3.1`) is slower than a 3B one
+  (`llama3.2:3b`).
+
+Ways to make it fast:
 
 ```bash
+# Smaller model + shorter output (still local & free):
 PQC_RAG_LLM=llama3.2:3b PQC_RAG_MAX_TOKENS=280 streamlit run app/streamlit_app.py
+# ...or Offline mode in the sidebar — deterministic, instant, no LLM at all.
 ```
+
+### Using a hosted LLM instead of local Ollama
+
+The synthesizer talks to **any OpenAI-compatible endpoint**, so you can swap the
+free local Ollama for a hosted API (OpenAI, Groq, Together, a company gateway…) —
+much faster than CPU inference — by setting three env vars, no code change:
+
+```bash
+export OPENAI_BASE_URL=https://api.openai.com/v1
+export OPENAI_API_KEY=sk-...
+export PQC_RAG_LLM=gpt-4o-mini
+pqc-audit-rag audit examples/vulnerable_sample.py --md
+```
+
+Hosted models have a known per-token price, so the monitoring **cost** panel fills
+in (see `PRICES` / `calc_cost` in `monitoring.py`; `gpt-4o-mini`, `gpt-4o`,
+`gpt-4.1`… are priced, local/unknown models read $0). The Streamlit sidebar has an
+optional **Hosted LLM** section (Base URL / API key) for the same thing without
+touching the environment. Your key is only used for that request and never stored.
 
 Key environment variables: `OPENAI_BASE_URL` (default `http://localhost:11434/v1`),
 `OPENAI_API_KEY` (default `ollama`), `PQC_RAG_LLM`, `PQC_RAG_MAX_TOKENS`,
-`PQC_RAG_RETRIEVAL` (dense|text|hybrid|rerank), `PQC_RAG_PROMPT`, `PQC_RAG_TOPK`.
-Any OpenAI-compatible endpoint works (e.g. a free hosted tier) by setting the
-first three.
+`PQC_RAG_RETRIEVAL` (dense|text|hybrid|rerank), `PQC_RAG_PROMPT`, `PQC_RAG_TOPK`,
+`PQC_RAG_PG_DSN` (Postgres DSN for monitoring; unset = disabled).
 
 Run the tests (no Ollama / no ONNX / no network — uses offline fallbacks):
 
@@ -203,6 +238,43 @@ Latest run (judge & synthesizer = llama3.1):
 Margins are small (all three are solid); `concise` edges ahead on faithfulness and
 is the default (`PQC_RAG_PROMPT`).
 
+## Monitoring (Postgres + Grafana)
+
+Every audit is persisted to **Postgres** (`audit_run` + a per-exposure
+`audit_exposure` table) together with the retrieval method, prompt style,
+synthesizer, latency, token usage and estimated cost; 👍/👎 feedback goes to a
+`feedback` table linked to the run. A provisioned **Grafana** dashboard reads it —
+**7 charts** plus 4 stat tiles: audits over time, severity mix, feedback split,
+tokens & estimated cost, latency, a usage-by-method/prompt table, and top exposed
+algorithms.
+
+![Grafana dashboard — stat tiles, audits over time, severity mix, user feedback, tokens & cost, latency](images/grafana1.png)
+
+![Grafana dashboard — usage by retrieval method/prompt and top exposed algorithms](images/grafana2.png)
+
+The screenshots above are a live run: 18 audits (6 with real `llama3.2:3b`
+synthesis, ~13.7k tokens) over the bundled examples. Cost reads $0 because the
+model is local; latency is high because it is CPU-only LLM inference — the honest
+behaviour of the free stack.
+
+```bash
+# Bring up the metrics stack (Postgres + Grafana, dashboard auto-provisioned).
+docker compose -f monitoring/docker-compose.yml up -d
+
+# Point the app at Postgres and run audits (CLI or Streamlit).
+uv pip install -e ".[monitoring]"
+export PQC_RAG_PG_DSN=postgresql://pqc:pqc@localhost:5432/pqc_rag
+pqc-audit-rag audit examples/vulnerable_sample.py --offline >/dev/null
+
+# Open Grafana → dashboard "PQC Audit RAG".
+open http://localhost:3000        # anonymous viewing; admin login is admin/admin
+```
+
+Monitoring is **best-effort**: with no `PQC_RAG_PG_DSN` (the default free stack)
+every call is a no-op and feedback falls back to a local JSONL file — an audit
+never fails because the metrics store is down. Cost is $0 for local Ollama models
+and priced per-token for hosted OpenAI-compatible models (`calc_cost`).
+
 ## Evaluation criteria map (LLM Zoomcamp)
 
 This section is filled in as each phase lands, so reviewers can find the
@@ -216,8 +288,8 @@ relevant code quickly.
 | LLM evaluation | `evaluation/evaluate_llm.py`, `LLM_RESULTS.md` (3 prompts, judge) | ✅ |
 | Interface | `app/streamlit_app.py` (Streamlit UI) | ✅ |
 | Ingestion pipeline | `knowledge_base/ingest.py` (LanceDB) + `ingestion/dlt_pipeline.py` (dlt→DuckDB) | ✅ (automated) |
-| Monitoring | user feedback in `feedback.py`; Postgres + Grafana next | 🟡 feedback done |
-| Containerization | `docker-compose.yml` | ⏳ |
+| Monitoring | `monitoring.py` (Postgres) + Grafana dashboard (`monitoring/`, 7 charts) + user feedback | ✅ |
+| Containerization | `monitoring/docker-compose.yml` (Postgres + Grafana) | 🟡 monitoring stack |
 | Reproducibility | this README, pinned deps | ⏳ |
 | Best practices: hybrid search + re-ranking | `search.py`, `evaluation/RESULTS.md` | ✅ |
 | Best practices: query rewriting | `search.py` (heuristic + LLM), `RESULTS.md` | ✅ |
@@ -235,8 +307,8 @@ relevant code quickly.
 4. ✅ LLM evaluation (3 prompt styles compared with an LLM-as-judge) + query
    rewriting best practice.
 5. ✅ Streamlit UI + user feedback.
-6. ⏳ Monitoring (Postgres + Grafana, ≥5 charts).
-7. ⏳ Containerization (docker-compose) + reproducibility polish.
+6. ✅ Monitoring (Postgres + Grafana, 7 charts) — see below.
+7. ⏳ Containerization (docker-compose for the whole app) + reproducibility polish.
 8. ⏳ Cloud deployment (bonus).
 
 ## License

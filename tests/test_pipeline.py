@@ -30,6 +30,23 @@ def test_run_audit_default_retrieval(vulnerable_file):
     assert report.recommendations[0].citations
 
 
+def test_run_audit_populates_run_metadata(vulnerable_file, retriever):
+    report = run_audit(
+        str(vulnerable_file),
+        retriever=retriever,
+        synthesizer=FakeSynthesizer(),
+        method="hybrid",
+        top_k=3,
+    )
+    # Metadata the monitoring layer persists.
+    assert report.retrieval_method == "hybrid"
+    assert report.top_k == 3
+    assert report.latency_ms >= 0.0
+    # FakeSynthesizer makes no LLM calls -> no token usage.
+    assert report.total_tokens == 0
+    assert report.model == ""
+
+
 def test_run_audit_clean_file(tmp_path, retriever):
     clean = tmp_path / "clean.py"
     clean.write_text("x = 1 + 1\n")

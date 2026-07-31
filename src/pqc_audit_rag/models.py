@@ -50,10 +50,24 @@ class MigrationRecommendation(BaseModel):
 
 
 class AuditReport(BaseModel):
-    """The full result of an audit: verdict, counts and per-exposure guidance."""
+    """The full result of an audit: verdict, counts and per-exposure guidance.
+
+    The trailing fields are run metadata (retrieval method, prompt style, model,
+    latency and token usage). They are populated by the pipeline and consumed by
+    the monitoring layer; they default to empty so nothing else has to set them.
+    """
 
     path: str
     verdict: str
     counts: dict[str, int] = Field(default_factory=dict)
     recommendations: list[MigrationRecommendation] = Field(default_factory=list)
     generated_by: str = "fake"
+    # Run metadata (for monitoring / Grafana).
+    model: str = ""
+    retrieval_method: str = ""
+    prompt_style: str = ""
+    top_k: int = 0
+    latency_ms: float = 0.0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0

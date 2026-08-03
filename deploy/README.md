@@ -5,21 +5,31 @@ For the cloud we deploy **the app** and use a **hosted LLM** (Groq has a free ti
 instead of local Ollama. Monitoring (Postgres + Grafana) is optional in the cloud —
 without `PQC_RAG_PG_DSN` it's a no-op, and feedback falls back to JSONL.
 
-## Recommended: Hugging Face Spaces (Docker)
+## Recommended (free): Streamlit Community Cloud
 
-Reuses the repo's `Dockerfile` (it already handles the src-layout install and bakes
-the ONNX embedding model), so the Space builds with no extra work.
+No Docker, no card. Uses the repo's `requirements.txt` (`.[app,llm]`) — a
+lightweight install (hashing embedder + in-memory store, so no onnxruntime/lancedb).
 
-1. Create a **new Space** → SDK **Docker** → **Blank**.
-2. Put this repo's contents in the Space (link the GitHub repo, or push a copy).
-3. Set the Space's `README.md` to the front-matter in
-   [`huggingface/README.md`](huggingface/README.md) (declares `app_port: 8501`).
-4. In **Settings → Variables and secrets**, add (so the UI defaults to Groq):
-   - `OPENAI_BASE_URL = https://api.groq.com/openai/v1`
-   - `OPENAI_API_KEY = <your Groq key>`  *(secret)* — from <https://console.groq.com/keys>
-   - `PQC_RAG_LLM = llama-3.3-70b-versatile`
-5. The Space builds and serves the Streamlit UI. Users can also switch provider or
-   use **Offline** mode in the sidebar.
+1. Go to <https://share.streamlit.io> → **Create app** → **From existing repo**.
+2. Repo `rauleteee/pqc-audit-rag`, branch `main`, main file `app/streamlit_app.py`.
+3. **Advanced settings → Secrets**, add (so the UI defaults to Groq, free):
+   ```toml
+   OPENAI_BASE_URL = "https://api.groq.com/openai/v1"
+   OPENAI_API_KEY  = "<your Groq key>"   # https://console.groq.com/keys
+   PQC_RAG_LLM     = "llama-3.3-70b-versatile"
+   ```
+4. **Deploy**. Users can also switch provider or use **Offline** mode in the sidebar.
+
+## Hugging Face Spaces (Docker) — needs a PRO account
+
+Reuses the repo's `Dockerfile` (handles the src-layout install and bakes the ONNX
+model). **Note:** Docker Spaces on `cpu-basic` now require HF **PRO** (free tier is
+static-only).
+
+1. Create a **new Space** → SDK **Docker**; put this repo's contents in it.
+2. Set the Space `README.md` to [`huggingface/README.md`](huggingface/README.md)
+   (declares `app_port: 8501`).
+3. In **Settings → Variables and secrets** add the same Groq vars as above.
 
 > The web UI only scans the bundled `examples/` in a hosted deploy (path traversal
 > is blocked by design — see `SECURITY.md`).

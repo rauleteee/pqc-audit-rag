@@ -1,0 +1,5 @@
+# For Streamlit Community Cloud (free). Installs this package + the app/LLM extras.
+# Lightweight on purpose: no onnxruntime/lancedb, so retrieval uses the built-in
+# hashing embedder + in-memory store (the app falls back automatically). Point the
+# LLM at a hosted provider (e.g. Groq) via the app's secrets.
+.[app,llm]

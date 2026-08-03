@@ -4,12 +4,17 @@
 [![Security](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/security.yml/badge.svg)](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/security.yml)
 [![CodeQL](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/codeql.yml/badge.svg)](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/codeql.yml)
 
+**▶️ Live demo: <https://pqc-audit-rag.streamlit.app>** — scan a public GitHub repo
+(e.g. `https://github.com/paramiko/paramiko`) or upload your own.
+
 A retrieval-augmented **agent that turns a cryptography inventory into an
 actionable post-quantum (PQC) migration plan**. It scans a Python project for
 quantum-vulnerable cryptography (RSA, ECC, DSA, Diffie-Hellman, Ed25519), then,
 for each exposure, retrieves guidance from a curated knowledge base (NIST
 standards, migration mappings, regulatory timelines) and an LLM synthesizes a
 cited, per-finding migration recommendation.
+
+![PQC Audit RAG scanning a public GitHub repo — verdict, severity chips and a cited ECDSA → ML-DSA migration plan](images/streamlit_github_scan.png)
 
 Built for the **LLM Zoomcamp** final project. Runs on a **100% free, local
 stack** by default (no paid API keys) — and can point at any hosted

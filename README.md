@@ -38,9 +38,12 @@ app closes that loop — inventory → retrieved guidance → concrete migration
 
 ## Status
 
-Working end-to-end. **Phases 0–6 done:** RAG core (scan → group exposures →
+Complete and live. **Phases 0–8 done:** RAG core (scan → group exposures →
 retrieve → synthesize → report), automated ingestion, retrieval + LLM evaluation,
-a Streamlit UI, and a Postgres + Grafana monitoring stack. See the roadmap below.
+a Streamlit UI (scan an example, a public GitHub repo, or an upload), a
+Postgres + Grafana monitoring stack, a full docker-compose deployment, CI/security
+pipelines, and a **live cloud demo** (<https://pqc-audit-rag.streamlit.app>). See
+the roadmap below.
 
 ## Architecture
 
@@ -363,7 +366,7 @@ relevant code quickly.
 | Reproducibility | this README, `Dockerfile` base image, `docker compose up` | ✅ |
 | Best practices: hybrid search + re-ranking | `search.py`, `evaluation/RESULTS.md` | ✅ |
 | Best practices: query rewriting | `search.py` (heuristic + LLM), `RESULTS.md` | ✅ |
-| Cloud deployment (bonus) | `deploy/` — Hugging Face Spaces (Docker) guide + configs, hosted-LLM ready | 🟡 ready to deploy |
+| Cloud deployment (bonus) | live demo on Streamlit Cloud (<https://pqc-audit-rag.streamlit.app>); `deploy/` guide + configs | ✅ |
 
 ## Roadmap
 
@@ -380,8 +383,9 @@ relevant code quickly.
 6. ✅ Monitoring (Postgres + Grafana, 7 charts) — see below.
 7. ✅ Containerization: `docker compose up` runs app + Postgres + Grafana + Ollama;
    `Dockerfile`, `Makefile` for reproducibility.
-8. ✅ Cloud deployment (bonus): Hugging Face Spaces (Docker) guide + configs in
-   [`deploy/`](deploy/README.md), using a hosted LLM (Groq, free).
+8. ✅ Cloud deployment (bonus): **live on Streamlit Community Cloud**
+   (<https://pqc-audit-rag.streamlit.app>), using a hosted LLM (Groq, free). See
+   [`deploy/`](deploy/README.md) for the guide and other options.
 
 ## Continuous integration & security
 
@@ -391,7 +395,7 @@ GitHub Actions run on every push and pull request (see `.github/workflows/`):
 |---|---|
 | **CI** (`ci.yml`) | Ruff lint + format check; `pytest` on Python 3.10 / 3.11 / 3.12; build the sdist + wheel and `twine check` them. |
 | **Security** (`security.yml`) | Bandit static analysis; `pip-audit` dependency-vulnerability scan; **CycloneDX SBOM** generation (uploaded as an artifact); gitleaks secret scan. |
-| **CodeQL** (`codeql.yml`) | GitHub CodeQL (`security-and-quality`) for Python. |
+| **CodeQL** (`codeql.yml`) | GitHub CodeQL (`security-extended`) for Python. |
 | **Dependency review** (`dependency-review.yml`) | Flags vulnerable / disallowed-license dependencies added in a PR. |
 | **Dependabot** (`dependabot.yml`) | Weekly `pip` + `github-actions` update PRs. |
 

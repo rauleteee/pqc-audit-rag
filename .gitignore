@@ -14,3 +14,6 @@ models/
 .env
 .ipynb_checkpoints/
 .pqc_rag_feedback.jsonl
+
+# local working notes
+CLAUDE.md

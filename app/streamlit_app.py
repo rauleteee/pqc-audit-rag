@@ -229,27 +229,26 @@ def main() -> None:
         run = st.button("Run audit", type="primary", use_container_width=True)
 
     if run:
-        # Harden the web UI against path traversal: only scan inside the directory
-        # the app was launched from (your project) or the bundled examples. A
-        # served UI must not read arbitrary server paths. The CLI has no such limit
-        # for local use (`pqc-audit-rag audit <path>`).
+        # Harden the web UI against path traversal (CodeQL py/path-injection): the
+        # scan path is canonicalised and must live inside the launch directory
+        # (your project) or the bundled examples — a served UI must not read
+        # arbitrary server paths. The CLI is unrestricted for local use.
         resolved = os.path.realpath(path.strip())
-        allowed_roots = [
-            os.path.realpath(Path.cwd()),
-            os.path.realpath(EXAMPLES_DIR),
-        ]
-        if not any(
-            resolved == root or resolved.startswith(root + os.sep)
-            for root in allowed_roots
+        cwd = os.path.realpath(Path.cwd())
+        examples = os.path.realpath(EXAMPLES_DIR)
+        if not (
+            resolved == cwd
+            or resolved.startswith(cwd + os.sep)
+            or resolved == examples
+            or resolved.startswith(examples + os.sep)
         ):
             st.error(
-                f"For safety the web UI only scans inside `{Path.cwd()}` or the "
-                "bundled examples. Use the CLI to scan another location."
+                f"For safety the web UI only scans inside `{cwd}` or the bundled "
+                "examples. Use the CLI to scan another location."
             )
             return
-        target = Path(resolved)
-        if not target.exists():
-            st.error(f"Path not found: {target}")
+        if not os.path.exists(resolved):
+            st.error(f"Path not found: {resolved}")
             return
         offline = mode.startswith("Offline")
         synthesizer = (
@@ -273,7 +272,7 @@ def main() -> None:
                         bar.progress(min(max(progress, 0.0), 1.0))
 
                 report = run_audit(
-                    str(target),
+                    resolved,
                     synthesizer=synthesizer,
                     method=method,
                     top_k=top_k,

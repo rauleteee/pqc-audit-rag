@@ -163,7 +163,8 @@ docker compose down              # stop  (make down)   ·   -v to wipe data (mak
 ```
 
 `make help` lists the common tasks (venv, test, lint, security/SBOM, up/down).
-Dependencies are pinned in `uv.lock` for reproducible installs. The monitoring-only
+A fixed Python base image plus resolved dependencies keep installs reproducible.
+The monitoring-only
 stack still lives in `monitoring/docker-compose.yml`.
 
 The UI has an **example picker** (several scenarios: SSH, JWT-style, messaging,
@@ -353,7 +354,7 @@ relevant code quickly.
 | Ingestion pipeline | `knowledge_base/ingest.py` (LanceDB) + `ingestion/dlt_pipeline.py` (dlt→DuckDB) | ✅ (automated) |
 | Monitoring | `monitoring.py` (Postgres) + Grafana dashboard (`monitoring/`, 7 charts) + user feedback | ✅ |
 | Containerization | `docker-compose.yml` — app + Postgres + Grafana + Ollama; `Dockerfile`, `Makefile` | ✅ |
-| Reproducibility | this README, `uv.lock`, `docker compose up` | ✅ |
+| Reproducibility | this README, `Dockerfile` base image, `docker compose up` | ✅ |
 | Best practices: hybrid search + re-ranking | `search.py`, `evaluation/RESULTS.md` | ✅ |
 | Best practices: query rewriting | `search.py` (heuristic + LLM), `RESULTS.md` | ✅ |
 | Cloud deployment (bonus) | `deploy/` — Hugging Face Spaces (Docker) guide + configs, hosted-LLM ready | 🟡 ready to deploy |
@@ -372,7 +373,7 @@ relevant code quickly.
 5. ✅ Streamlit UI + user feedback.
 6. ✅ Monitoring (Postgres + Grafana, 7 charts) — see below.
 7. ✅ Containerization: `docker compose up` runs app + Postgres + Grafana + Ollama;
-   `Dockerfile`, `Makefile`, `uv.lock` for reproducibility.
+   `Dockerfile`, `Makefile` for reproducibility.
 8. ✅ Cloud deployment (bonus): Hugging Face Spaces (Docker) guide + configs in
    [`deploy/`](deploy/README.md), using a hosted LLM (Groq, free).
 

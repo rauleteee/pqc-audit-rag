@@ -30,7 +30,9 @@ def chunk_markdown(text: str, source: str) -> list[Chunk]:
         if not part:
             continue
         heading = part.splitlines()[0].lstrip("#").strip()
-        chunks.append(Chunk(id=f"{source}#{i}", text=part, source=f"{source} :: {heading}"))
+        chunks.append(
+            Chunk(id=f"{source}#{i}", text=part, source=f"{source} :: {heading}")
+        )
     return chunks
 
 

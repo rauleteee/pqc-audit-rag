@@ -1,0 +1,19 @@
+name: Dependency review
+
+# Flags known-vulnerable or disallowed-license dependencies added in a pull
+# request, before they are merged.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: Review PR dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high

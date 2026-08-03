@@ -14,8 +14,16 @@ from pathlib import Path
 
 from pqc_audit_rag.config import settings
 
+# Pin the Hub revision for reproducible, tamper-evident downloads. Override with
+# a specific commit SHA or tag for a fully immutable pin.
+DEFAULT_REVISION = "main"
 
-def download(repo_id: str | None = None, dest: str | None = None) -> Path:
+
+def download(
+    repo_id: str | None = None,
+    dest: str | None = None,
+    revision: str = DEFAULT_REVISION,
+) -> Path:
     """Download ``tokenizer.json`` and ``onnx/model.onnx`` into ``dest``."""
     from huggingface_hub import hf_hub_download
 
@@ -23,8 +31,12 @@ def download(repo_id: str | None = None, dest: str | None = None) -> Path:
     dest_dir = Path(dest or settings.embed_model_dir)
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    tokenizer = hf_hub_download(repo_id=repo_id, filename="tokenizer.json")
-    model = hf_hub_download(repo_id=repo_id, filename="onnx/model.onnx")
+    tokenizer = hf_hub_download(
+        repo_id=repo_id, filename="tokenizer.json", revision=revision
+    )
+    model = hf_hub_download(
+        repo_id=repo_id, filename="onnx/model.onnx", revision=revision
+    )
     shutil.copyfile(tokenizer, dest_dir / "tokenizer.json")
     shutil.copyfile(model, dest_dir / "model.onnx")
     return dest_dir

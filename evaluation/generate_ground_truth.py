@@ -49,7 +49,9 @@ def main() -> None:
             messages=[
                 {
                     "role": "user",
-                    "content": _PROMPT.format(n=QUESTIONS_PER_CHUNK, passage=chunk.text),
+                    "content": _PROMPT.format(
+                        n=QUESTIONS_PER_CHUNK, passage=chunk.text
+                    ),
                 }
             ],
             response_format={"type": "json_object"},

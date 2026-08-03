@@ -127,6 +127,18 @@ then `streamlit run app/streamlit_app.py`.
   `PQC_RAG_LLM_VERIFY`; hosted CLI examples; two UI screenshots). New `docs/`
   folder: `ui-guide.md` (full sidebar walkthrough + hosted providers + TLS +
   troubleshooting), linked from the README.
+- **CI / quality / security pipelines (this session).** `.github/workflows/`:
+  `ci.yml` (ruff lint + format check, `pytest` on py3.10/3.11/3.12, build +
+  `twine check`), `security.yml` (bandit, `pip-audit`, **CycloneDX SBOM** artifact,
+  gitleaks), `codeql.yml`, `dependency-review.yml`; `.github/dependabot.yml`
+  (weekly pip + actions). Ruff config in `pyproject.toml` (`[tool.ruff]`: curated
+  select E/F/I/W/UP/B/C4, line-length 88 — deliberately NOT the pedantic style
+  plugins, since monitoring uses intentional blind-except). Whole codebase
+  `ruff format`-normalised once. Security fixes made to reach a clean scan: HF
+  download pins `revision` (bandit B615); a justified `# nosec B608` on the
+  parameterised SQL in `monitoring.py`; `.gitleaks.toml` allowlists the corpus
+  (crypto identifiers like `sntrup761x25519-sha512` read as high-entropy secrets).
+  All gates verified green locally before committing.
 
 Rubric best practices covered: **hybrid search, re-ranking, query rewriting** (all
 in `search.py`, all evaluated).

@@ -96,7 +96,9 @@ class LanceDBStore:
         for r in rows:
             # LanceDB returns L2 distance in ``_distance``; convert to a score.
             score = 1.0 / (1.0 + float(r.get("_distance", 0.0)))
-            results.append((Chunk(id=r["id"], text=r["text"], source=r["source"]), score))
+            results.append(
+                (Chunk(id=r["id"], text=r["text"], source=r["source"]), score)
+            )
         return results
 
     def __len__(self) -> int:

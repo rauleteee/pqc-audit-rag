@@ -18,7 +18,7 @@ _SEVERITY_ORDER = {"CRITICAL": 0, "MEDIUM": 1, "INFO": 2}
 
 def group_exposures(findings: list[Finding]) -> list[Exposure]:
     """Collapse findings into exposures, worst severity first."""
-    groups: "OrderedDict[tuple[str, str, str], list[Finding]]" = OrderedDict()
+    groups: OrderedDict[tuple[str, str, str], list[Finding]] = OrderedDict()
     for f in findings:
         key = (f.library, f.algorithm, f.usage.value)
         groups.setdefault(key, []).append(f)

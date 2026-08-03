@@ -97,8 +97,7 @@ def run_audit(
         )
         passages = retriever.for_exposure(exp, top_k)
         emit(
-            f"[{i}/{len(exposures)}] Synthesizing migration plan for "
-            f"{exp.algorithm}…",
+            f"[{i}/{len(exposures)}] Synthesizing migration plan for {exp.algorithm}…",
             base + 0.45 * 0.9 / total,
         )
         recommendations.append(synthesizer.synthesize(exp, passages))

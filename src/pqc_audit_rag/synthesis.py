@@ -213,9 +213,12 @@ class LLMSynthesizer:
         return OpenAI(base_url=self.base_url, api_key=self.api_key, **kwargs)
 
     def _user_prompt(self, exposure: Exposure, passages: list[Passage]) -> str:
-        context = "\n\n".join(
-            f"[{i + 1}] {p.source}\n{p.text}" for i, p in enumerate(passages)
-        ) or "(no context retrieved)"
+        context = (
+            "\n\n".join(
+                f"[{i + 1}] {p.source}\n{p.text}" for i, p in enumerate(passages)
+            )
+            or "(no context retrieved)"
+        )
         return (
             f"Exposure: {exposure.algorithm} used for "
             f"{exposure.usage.replace('_', ' ')} "

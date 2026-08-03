@@ -51,7 +51,9 @@ def test_truncated_json_salvages_summary_and_complete_steps():
 
 
 def test_truncated_json_with_escapes():
-    truncated = '{ "summary": "Use \\"hybrid\\" mode (X25519 + ML-KEM).", "steps": [ "Step'
+    truncated = (
+        '{ "summary": "Use \\"hybrid\\" mode (X25519 + ML-KEM).", "steps": [ "Step'
+    )
     summary, steps = _extract_payload(truncated)
     assert summary == 'Use "hybrid" mode (X25519 + ML-KEM).'
     assert steps == []

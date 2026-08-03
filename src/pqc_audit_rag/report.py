@@ -62,7 +62,9 @@ def to_html(report: AuditReport) -> str:
             f"→ {esc(rec.migration_target)}</h2>"
             f"<p>{esc(rec.summary)}</p><ul>{steps}</ul>{cites}</article>"
         )
-    body = "".join(rows) or "<p><em>No quantum-vulnerable cryptography detected.</em></p>"
+    body = (
+        "".join(rows) or "<p><em>No quantum-vulnerable cryptography detected.</em></p>"
+    )
 
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -85,9 +87,9 @@ def to_html(report: AuditReport) -> str:
 <header>
   <h1>Post-Quantum Exposure &amp; Migration Report</h1>
   <p><strong>Verdict:</strong> {esc(report.verdict)}</p>
-  <p class="counts">CRITICAL: {c.get('CRITICAL', 0)} &nbsp;|&nbsp; MEDIUM:
-     {c.get('MEDIUM', 0)} &nbsp;|&nbsp; INFO: {c.get('INFO', 0)} &nbsp;|&nbsp;
-     total: {c.get('total', 0)}</p>
+  <p class="counts">CRITICAL: {c.get("CRITICAL", 0)} &nbsp;|&nbsp; MEDIUM:
+     {c.get("MEDIUM", 0)} &nbsp;|&nbsp; INFO: {c.get("INFO", 0)} &nbsp;|&nbsp;
+     total: {c.get("total", 0)}</p>
   <p>Scanned: <code>{esc(report.path)}</code> · synthesized by:
      <code>{esc(report.generated_by)}</code></p>
 </header>

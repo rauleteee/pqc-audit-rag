@@ -38,11 +38,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="LLM provider preset (fills base URL + default model); e.g. 'groq'.",
     )
     audit.add_argument(
-        "--base-url", default=None, help="OpenAI-compatible base URL (overrides preset)."
+        "--base-url",
+        default=None,
+        help="OpenAI-compatible base URL (overrides preset).",
     )
-    audit.add_argument(
-        "--api-key", default=None, help="API key for a hosted provider."
-    )
+    audit.add_argument("--api-key", default=None, help="API key for a hosted provider.")
     audit.add_argument(
         "--ca-bundle",
         default=None,

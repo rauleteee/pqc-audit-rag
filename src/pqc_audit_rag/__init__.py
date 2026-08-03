@@ -7,16 +7,16 @@ migration knowledge base (RAG), orchestration and reporting.
 from __future__ import annotations
 
 from pqc_audit_rag.grouping import group_exposures
-from pqc_audit_rag.monitoring import record_run
+from pqc_audit_rag.metrics import evaluate
 from pqc_audit_rag.models import (
     AuditReport,
     Exposure,
     MigrationRecommendation,
     Passage,
 )
+from pqc_audit_rag.monitoring import record_run
 from pqc_audit_rag.pipeline import run_audit
 from pqc_audit_rag.report import to_html, to_markdown
-from pqc_audit_rag.metrics import evaluate
 from pqc_audit_rag.retrieval import Retriever, build_query
 from pqc_audit_rag.search import (
     HybridRetriever,

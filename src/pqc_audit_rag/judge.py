@@ -41,9 +41,10 @@ def _user_prompt(
     passages: list[Passage],
     recommendation: MigrationRecommendation,
 ) -> str:
-    context = "\n\n".join(
-        f"[{i + 1}] {p.source}\n{p.text}" for i, p in enumerate(passages)
-    ) or "(no context)"
+    context = (
+        "\n\n".join(f"[{i + 1}] {p.source}\n{p.text}" for i, p in enumerate(passages))
+        or "(no context)"
+    )
     steps = "\n".join(f"- {s}" for s in recommendation.steps)
     return (
         f"Exposure: {exposure.algorithm} used for "
@@ -76,7 +77,10 @@ def judge_recommendation(
         model=model or settings.llm_model,
         messages=[
             {"role": "system", "content": _JUDGE_SYSTEM},
-            {"role": "user", "content": _user_prompt(exposure, passages, recommendation)},
+            {
+                "role": "user",
+                "content": _user_prompt(exposure, passages, recommendation),
+            },
         ],
         response_format={"type": "json_object"},
         temperature=0,

@@ -29,7 +29,9 @@ def main() -> None:
     exposures = group_exposures(scan(str(SAMPLE)))
     retriever = make_retriever(settings.retrieval_method)
     # Retrieve once per exposure (retrieval is fixed; only the prompt varies).
-    contexts = {e.algorithm: retriever.for_exposure(e, settings.top_k) for e in exposures}
+    contexts = {
+        e.algorithm: retriever.for_exposure(e, settings.top_k) for e in exposures
+    }
 
     rows: dict[str, dict] = {}
     for style in SYNTHESIS_STYLES:
@@ -47,8 +49,10 @@ def main() -> None:
             "actionability": act / n,
             "overall": (faith + act) / (2 * n),
         }
-        print(f"{style:10} faith={rows[style]['faithfulness']:.2f} "
-              f"act={rows[style]['actionability']:.2f} overall={rows[style]['overall']:.2f}")
+        print(
+            f"{style:10} faith={rows[style]['faithfulness']:.2f} "
+            f"act={rows[style]['actionability']:.2f} overall={rows[style]['overall']:.2f}"
+        )
 
     best = max(rows, key=lambda s: rows[s]["overall"])
     header = (

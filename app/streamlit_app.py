@@ -23,7 +23,12 @@ from pqc_audit_rag.pipeline import run_audit
 from pqc_audit_rag.providers import DEFAULT_PROVIDER, PROVIDERS
 from pqc_audit_rag.synthesis import FakeSynthesizer, LLMSynthesizer
 
-TONE = {"CRITICAL": "#d12d2d", "MEDIUM": "#c77800", "INFO": "#1f7ab5", "clean": "#2e7d32"}
+TONE = {
+    "CRITICAL": "#d12d2d",
+    "MEDIUM": "#c77800",
+    "INFO": "#1f7ab5",
+    "clean": "#2e7d32",
+}
 
 EXAMPLES_DIR = Path(__file__).parents[1] / "examples"
 
@@ -76,7 +81,7 @@ def _render_report(report: AuditReport) -> None:
 
     st.markdown(
         f'<p class="pqc-sub">scanned <code>{e(report.path)}</code> · synthesized by '
-        f'<code>{e(report.generated_by)}</code></p>',
+        f"<code>{e(report.generated_by)}</code></p>",
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -110,7 +115,7 @@ def _render_report(report: AuditReport) -> None:
         st.markdown(
             f'<div class="pqc-card" style="--tone:{tone_color}">'
             f'<h3><span class="pqc-badge" style="--tone:{tone_color}">{e(rec.severity)}</span>'
-            f'{e(rec.algorithm)} — {e(rec.usage.replace("_", " "))} '
+            f"{e(rec.algorithm)} — {e(rec.usage.replace('_', ' '))} "
             f'<span class="pqc-target">→ {e(rec.migration_target)}</span></h3>'
             f"<p>{e(rec.summary)}</p><ul>{steps}</ul>{cites}</div>",
             unsafe_allow_html=True,
@@ -197,7 +202,8 @@ def main() -> None:
                 "CA bundle path (recommended for a private CA)", value=""
             )
             insecure = st.checkbox(
-                "Disable TLS certificate verification (insecure)", value=False,
+                "Disable TLS certificate verification (insecure)",
+                value=False,
                 help="Only for a trusted internal endpoint whose CA this machine "
                 "does not know. Prefer the CA bundle path above.",
             )
@@ -212,7 +218,11 @@ def main() -> None:
         )
         top_k = st.slider("Retrieved passages (top-k)", 1, 8, settings.top_k)
         max_tokens = st.slider(
-            "Max output tokens", 200, 1200, settings.llm_max_tokens, step=50,
+            "Max output tokens",
+            200,
+            1200,
+            settings.llm_max_tokens,
+            step=50,
             help="Higher = fuller steps, slower. Too low truncates the guidance.",
         )
         run = st.button("Run audit", type="primary", use_container_width=True)

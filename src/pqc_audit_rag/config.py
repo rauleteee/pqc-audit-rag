@@ -36,14 +36,14 @@ class Settings:
     """Resolved settings. Read once at import as ``settings``."""
 
     # LLM: any OpenAI-compatible endpoint. Default = local Ollama (free, no key).
-    llm_base_url: str = os.environ.get(
-        "OPENAI_BASE_URL", "http://localhost:11434/v1"
-    )
+    llm_base_url: str = os.environ.get("OPENAI_BASE_URL", "http://localhost:11434/v1")
     llm_api_key: str = os.environ.get("OPENAI_API_KEY", "ollama")
     llm_model: str = os.environ.get("PQC_RAG_LLM", "llama3.1")
     # TLS verification for the LLM endpoint: True | False | path to a CA bundle.
     # Set PQC_RAG_LLM_VERIFY=false for an internal gateway with a private CA.
-    llm_verify_tls: bool | str = _parse_verify(os.environ.get("PQC_RAG_LLM_VERIFY", "true"))
+    llm_verify_tls: bool | str = _parse_verify(
+        os.environ.get("PQC_RAG_LLM_VERIFY", "true")
+    )
     # Cap synthesis output length. High enough that a summary + several steps fit
     # without the JSON being truncated; lower it (e.g. 300) for faster CPU runs.
     llm_max_tokens: int = int(os.environ.get("PQC_RAG_MAX_TOKENS", "700"))

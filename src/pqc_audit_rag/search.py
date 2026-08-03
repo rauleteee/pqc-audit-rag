@@ -81,7 +81,9 @@ class HybridRetriever:
                 passages.setdefault(passage.id, passage)
 
         ranked = sorted(scores, key=lambda cid: scores[cid], reverse=True)[:top_k]
-        return [passages[cid].model_copy(update={"score": scores[cid]}) for cid in ranked]
+        return [
+            passages[cid].model_copy(update={"score": scores[cid]}) for cid in ranked
+        ]
 
     def for_exposure(self, exposure: Exposure, top_k: int = 4) -> list[Passage]:
         return self.retrieve(build_query(exposure), top_k)

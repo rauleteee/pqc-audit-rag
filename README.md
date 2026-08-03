@@ -1,5 +1,9 @@
 # PQC Audit RAG — post-quantum migration assistant
 
+[![CI](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/ci.yml)
+[![Security](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/security.yml/badge.svg)](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/security.yml)
+[![CodeQL](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/codeql.yml/badge.svg)](https://github.com/rauleteee/pqc-audit-rag/actions/workflows/codeql.yml)
+
 A retrieval-augmented **agent that turns a cryptography inventory into an
 actionable post-quantum (PQC) migration plan**. It scans a Python project for
 quantum-vulnerable cryptography (RSA, ECC, DSA, Diffie-Hellman, Ed25519), then,
@@ -352,6 +356,22 @@ relevant code quickly.
 6. ✅ Monitoring (Postgres + Grafana, 7 charts) — see below.
 7. ⏳ Containerization (docker-compose for the whole app) + reproducibility polish.
 8. ⏳ Cloud deployment (bonus).
+
+## Continuous integration & security
+
+GitHub Actions run on every push and pull request (see `.github/workflows/`):
+
+| Workflow | What it does |
+|---|---|
+| **CI** (`ci.yml`) | Ruff lint + format check; `pytest` on Python 3.10 / 3.11 / 3.12; build the sdist + wheel and `twine check` them. |
+| **Security** (`security.yml`) | Bandit static analysis; `pip-audit` dependency-vulnerability scan; **CycloneDX SBOM** generation (uploaded as an artifact); gitleaks secret scan. |
+| **CodeQL** (`codeql.yml`) | GitHub CodeQL (`security-and-quality`) for Python. |
+| **Dependency review** (`dependency-review.yml`) | Flags vulnerable / disallowed-license dependencies added in a PR. |
+| **Dependabot** (`dependabot.yml`) | Weekly `pip` + `github-actions` update PRs. |
+
+Lint/format config lives in `pyproject.toml` (`[tool.ruff]`); the corpus is
+allowlisted for secret scanning in `.gitleaks.toml` (crypto algorithm names such
+as `sntrup761x25519-sha512` read as high-entropy secrets but are documentation).
 
 ## License
 

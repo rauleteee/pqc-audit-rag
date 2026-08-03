@@ -160,8 +160,10 @@ def record_run(report: AuditReport, override: str | None = None) -> int | None:
             conn.execute(SCHEMA_SQL)
             placeholders = ", ".join(["%s"] * len(row))
             with conn.cursor() as cur:
+                # Not SQL injection: _RUN_COLUMNS is a constant and `placeholders`
+                # is only "%s, %s, …"; every value is parameterized below.
                 cur.execute(
-                    f"INSERT INTO audit_run ({_RUN_COLUMNS}) "
+                    f"INSERT INTO audit_run ({_RUN_COLUMNS}) "  # nosec B608
                     f"VALUES ({placeholders}) RETURNING id",
                     list(row.values()),
                 )
@@ -184,8 +186,9 @@ def record_run(report: AuditReport, override: str | None = None) -> int | None:
         return None
 
 
-def record_feedback(entry: dict, run_id: int | None = None,
-                    override: str | None = None) -> bool:
+def record_feedback(
+    entry: dict, run_id: int | None = None, override: str | None = None
+) -> bool:
     """Persist one feedback event. Returns True if stored in Postgres.
 
     ``entry`` uses the JSONL feedback shape; only the charted fields are mapped.

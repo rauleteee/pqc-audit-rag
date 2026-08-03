@@ -10,11 +10,11 @@ from pqc_audit_rag.models import AuditReport, MigrationRecommendation
 
 
 def _report(**kw) -> AuditReport:
-    base = dict(
-        path="proj/",
-        verdict="quantum-critical cryptography in use — migration needed",
-        counts={"CRITICAL": 2, "MEDIUM": 1, "INFO": 0, "total": 3},
-        recommendations=[
+    base = {
+        "path": "proj/",
+        "verdict": "quantum-critical cryptography in use — migration needed",
+        "counts": {"CRITICAL": 2, "MEDIUM": 1, "INFO": 0, "total": 3},
+        "recommendations": [
             MigrationRecommendation(
                 algorithm="RSA-2048",
                 usage="key_generation",
@@ -24,16 +24,16 @@ def _report(**kw) -> AuditReport:
                 steps=["a"],
             )
         ],
-        generated_by="llm",
-        model="llama3.1",
-        retrieval_method="rerank",
-        prompt_style="concise",
-        top_k=4,
-        latency_ms=1234.5,
-        prompt_tokens=100,
-        completion_tokens=50,
-        total_tokens=150,
-    )
+        "generated_by": "llm",
+        "model": "llama3.1",
+        "retrieval_method": "rerank",
+        "prompt_style": "concise",
+        "top_k": 4,
+        "latency_ms": 1234.5,
+        "prompt_tokens": 100,
+        "completion_tokens": 50,
+        "total_tokens": 150,
+    }
     base.update(kw)
     return AuditReport(**base)
 

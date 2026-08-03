@@ -1,0 +1,16 @@
+# gitleaks configuration for pqc-audit-rag.
+# Extends the default rule set and allowlists the curated knowledge-base corpus:
+# it is public post-quantum documentation full of cryptographic algorithm
+# identifiers (e.g. the OpenSSH hybrid KEX `sntrup761x25519-sha512`) that look
+# like high-entropy secrets to the generic rules but are not credentials.
+
+title = "pqc-audit-rag gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Curated public PQC corpus — crypto algorithm names, not secrets."
+paths = [
+  '''src/pqc_audit_rag/knowledge_base/corpus/.*\.md''',
+]

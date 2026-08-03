@@ -12,7 +12,11 @@ class _FakeClient:
         choice = type("C", (), {"message": message})
         response = type("R", (), {"choices": [choice]})
         create = lambda **kwargs: response  # noqa: E731
-        self.chat = type("Chat", (), {"completions": type("Cmp", (), {"create": staticmethod(create)})})
+        self.chat = type(
+            "Chat",
+            (),
+            {"completions": type("Cmp", (), {"create": staticmethod(create)})},
+        )
 
 
 def _exposure():
@@ -38,7 +42,9 @@ def _rec():
 
 
 def test_judge_parses_scores():
-    client = _FakeClient(json.dumps({"faithfulness": 5, "actionability": 4, "reasoning": "ok"}))
+    client = _FakeClient(
+        json.dumps({"faithfulness": 5, "actionability": 4, "reasoning": "ok"})
+    )
     out = judge_recommendation(_exposure(), [], _rec(), client=client)
     assert out == {"faithfulness": 5, "actionability": 4, "reasoning": "ok"}
 

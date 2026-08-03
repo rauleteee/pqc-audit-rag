@@ -167,8 +167,9 @@ A fixed Python base image plus resolved dependencies keep installs reproducible.
 The monitoring-only
 stack still lives in `monitoring/docker-compose.yml`.
 
-The UI has an **example picker** (several scenarios: SSH, JWT-style, messaging,
-already-post-quantum) plus a custom path, a verdict banner, severity chips,
+The UI can scan a **bundled example**, a **public GitHub repo** (by URL), an
+**uploaded `.zip`/`.py`**, or a **local path** (when run on your own machine) —
+plus a verdict banner, severity chips,
 per-exposure cards with cited migration guidance, live progress, and 👍/👎
 feedback. **Offline mode** in the sidebar runs everything except the LLM (instant,
 no Ollama needed). The **LLM provider** selector switches between local Ollama and

@@ -6,6 +6,10 @@ ENV PIP_NO_CACHE_DIR=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+# git: for the "scan a public GitHub repo" source in the UI.
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install the package first (better layer caching). src is needed for the
 # dynamic version read at install time.
 COPY pyproject.toml README.md ./

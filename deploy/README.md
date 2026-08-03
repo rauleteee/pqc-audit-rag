@@ -31,8 +31,10 @@ static-only).
    (declares `app_port: 8501`).
 3. In **Settings → Variables and secrets** add the same Groq vars as above.
 
-> The web UI only scans the bundled `examples/` in a hosted deploy (path traversal
-> is blocked by design — see `SECURITY.md`).
+> In a hosted deploy, visitors scan their own code via **GitHub repo URL** (public,
+> shallow-cloned server-side) or by **uploading a `.zip`/`.py`** — the server can't
+> see their machine. Scanning an arbitrary server *path* is blocked by design (see
+> `SECURITY.md`).
 >
 > If the platform has a read-only filesystem and 👎/👍 feedback errors, set
 > `PQC_RAG_FEEDBACK=/tmp/feedback.jsonl` (a writable path) or configure

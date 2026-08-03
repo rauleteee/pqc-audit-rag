@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import html
 import os
+import shutil
 from pathlib import Path
 
 import streamlit as st
@@ -22,6 +23,7 @@ from pqc_audit_rag.feedback import record_feedback
 from pqc_audit_rag.models import AuditReport
 from pqc_audit_rag.pipeline import run_audit
 from pqc_audit_rag.providers import DEFAULT_PROVIDER, PROVIDERS
+from pqc_audit_rag.sources import SourceError, clone_github_repo, save_upload
 from pqc_audit_rag.synthesis import FakeSynthesizer, LLMSynthesizer
 
 TONE = {
@@ -136,6 +138,69 @@ def _feedback(report: AuditReport) -> None:
         st.toast("Thanks — we'll use this to improve.")
 
 
+def _cleanup_prev_tmp() -> None:
+    """Remove the temp dir from a previous GitHub/upload scan, if any."""
+    prev = st.session_state.pop("scan_tmp", None)
+    if prev:
+        shutil.rmtree(prev, ignore_errors=True)
+
+
+def _guarded_local_path(path: str) -> str | None:
+    """Canonicalise a local path and confine it to cwd or the bundled examples.
+
+    A served UI must not read arbitrary server paths (CodeQL py/path-injection);
+    the CLI is unrestricted for local use.
+    """
+    resolved = os.path.realpath(path.strip())
+    cwd = os.path.realpath(Path.cwd())
+    examples = os.path.realpath(EXAMPLES_DIR)
+    if not (
+        resolved == cwd
+        or resolved.startswith(cwd + os.sep)
+        or resolved == examples
+        or resolved.startswith(examples + os.sep)
+    ):
+        st.error(
+            f"For safety the web UI only scans inside `{cwd}` or the bundled "
+            "examples. Use GitHub/Upload, or the CLI, for other code."
+        )
+        return None
+    if not os.path.exists(resolved):
+        st.error(f"Path not found: {resolved}")
+        return None
+    return resolved
+
+
+def _resolve_scan_target(source, path, repo_url, uploaded) -> str | None:
+    """Turn the chosen source into a filesystem path to scan (or None on error)."""
+    _cleanup_prev_tmp()
+    if source == "GitHub repo (public)":
+        if not (repo_url or "").strip():
+            st.error("Enter a public repo URL.")
+            return None
+        try:
+            with st.spinner("Cloning repository…"):
+                dest = clone_github_repo(repo_url)
+        except SourceError as exc:
+            st.error(str(exc))
+            return None
+        st.session_state["scan_tmp"] = str(dest)
+        return str(dest)
+    if source == "Upload (.py / .zip)":
+        if uploaded is None:
+            st.error("Upload a .py file or a .zip of your project first.")
+            return None
+        try:
+            dest = save_upload(uploaded.name, uploaded.getvalue())
+        except SourceError as exc:
+            st.error(str(exc))
+            return None
+        st.session_state["scan_tmp"] = str(dest)
+        return str(dest)
+    # Bundled example / Local path
+    return _guarded_local_path(path)
+
+
 def main() -> None:
     st.set_page_config(page_title="PQC Audit RAG", page_icon="🔐", layout="centered")
     st.markdown(_CSS, unsafe_allow_html=True)
@@ -149,20 +214,44 @@ def main() -> None:
     with st.sidebar:
         st.header("Audit")
 
-        example_files = sorted(p.name for p in EXAMPLES_DIR.glob("*.py"))
-        options = example_files + ["Custom path…"]
-        default_index = (
-            example_files.index("vulnerable_sample.py")
-            if "vulnerable_sample.py" in example_files
-            else 0
+        source = st.radio(
+            "Scan source",
+            [
+                "Bundled example",
+                "GitHub repo (public)",
+                "Upload (.py / .zip)",
+                "Local path",
+            ],
+            help="A served demo can't see your machine — use an example, a public "
+            "repo, or upload your project. 'Local path' only works when you run "
+            "the app on your own machine.",
         )
-        choice = st.selectbox("Example project", options, index=default_index)
-        if choice == "Custom path…":
-            path = st.text_input("Project path", value="examples/vulnerable_sample.py")
-        else:
+        path = ""
+        repo_url = ""
+        uploaded = None
+        if source == "Bundled example":
+            example_files = sorted(p.name for p in EXAMPLES_DIR.glob("*.py"))
+            default_index = (
+                example_files.index("vulnerable_sample.py")
+                if "vulnerable_sample.py" in example_files
+                else 0
+            )
+            choice = st.selectbox("Example project", example_files, index=default_index)
             path = str(EXAMPLES_DIR / choice)
             if choice in EXAMPLE_DESCRIPTIONS:
                 st.caption(EXAMPLE_DESCRIPTIONS[choice])
+        elif source == "GitHub repo (public)":
+            repo_url = st.text_input(
+                "Public repo URL", placeholder="https://github.com/owner/repo"
+            )
+            st.caption("Shallow-cloned on the server and scanned. Public repos only.")
+        elif source == "Upload (.py / .zip)":
+            uploaded = st.file_uploader(
+                "Your project as a .zip (or a single .py)", type=["zip", "py"]
+            )
+            st.caption("Zip your project folder and drop it here.")
+        else:  # Local path
+            path = st.text_input("Project path", value="examples/vulnerable_sample.py")
         mode = st.radio(
             "Synthesis",
             ["LLM", "Offline (deterministic)"],
@@ -229,26 +318,8 @@ def main() -> None:
         run = st.button("Run audit", type="primary", use_container_width=True)
 
     if run:
-        # Harden the web UI against path traversal (CodeQL py/path-injection): the
-        # scan path is canonicalised and must live inside the launch directory
-        # (your project) or the bundled examples — a served UI must not read
-        # arbitrary server paths. The CLI is unrestricted for local use.
-        resolved = os.path.realpath(path.strip())
-        cwd = os.path.realpath(Path.cwd())
-        examples = os.path.realpath(EXAMPLES_DIR)
-        if not (
-            resolved == cwd
-            or resolved.startswith(cwd + os.sep)
-            or resolved == examples
-            or resolved.startswith(examples + os.sep)
-        ):
-            st.error(
-                f"For safety the web UI only scans inside `{cwd}` or the bundled "
-                "examples. Use the CLI to scan another location."
-            )
-            return
-        if not os.path.exists(resolved):
-            st.error(f"Path not found: {resolved}")
+        scan_target = _resolve_scan_target(source, path, repo_url, uploaded)
+        if scan_target is None:
             return
         offline = mode.startswith("Offline")
         synthesizer = (
@@ -272,7 +343,7 @@ def main() -> None:
                         bar.progress(min(max(progress, 0.0), 1.0))
 
                 report = run_audit(
-                    resolved,
+                    scan_target,
                     synthesizer=synthesizer,
                     method=method,
                     top_k=top_k,

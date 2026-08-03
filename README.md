@@ -356,7 +356,7 @@ relevant code quickly.
 | Reproducibility | this README, `uv.lock`, `docker compose up` | ✅ |
 | Best practices: hybrid search + re-ranking | `search.py`, `evaluation/RESULTS.md` | ✅ |
 | Best practices: query rewriting | `search.py` (heuristic + LLM), `RESULTS.md` | ✅ |
-| Cloud deployment (bonus) | `deploy/` | ⏳ |
+| Cloud deployment (bonus) | `deploy/` — Hugging Face Spaces (Docker) guide + configs, hosted-LLM ready | 🟡 ready to deploy |
 
 ## Roadmap
 
@@ -373,7 +373,8 @@ relevant code quickly.
 6. ✅ Monitoring (Postgres + Grafana, 7 charts) — see below.
 7. ✅ Containerization: `docker compose up` runs app + Postgres + Grafana + Ollama;
    `Dockerfile`, `Makefile`, `uv.lock` for reproducibility.
-8. ⏳ Cloud deployment (bonus).
+8. ✅ Cloud deployment (bonus): Hugging Face Spaces (Docker) guide + configs in
+   [`deploy/`](deploy/README.md), using a hosted LLM (Groq, free).
 
 ## Continuous integration & security
 

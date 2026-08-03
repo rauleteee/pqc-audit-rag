@@ -11,6 +11,7 @@ Run:  streamlit run app/streamlit_app.py
 from __future__ import annotations
 
 import html
+import os
 from pathlib import Path
 
 import streamlit as st
@@ -228,7 +229,25 @@ def main() -> None:
         run = st.button("Run audit", type="primary", use_container_width=True)
 
     if run:
-        target = Path(path.strip())
+        # Harden the web UI against path traversal: only scan inside the directory
+        # the app was launched from (your project) or the bundled examples. A
+        # served UI must not read arbitrary server paths. The CLI has no such limit
+        # for local use (`pqc-audit-rag audit <path>`).
+        resolved = os.path.realpath(path.strip())
+        allowed_roots = [
+            os.path.realpath(Path.cwd()),
+            os.path.realpath(EXAMPLES_DIR),
+        ]
+        if not any(
+            resolved == root or resolved.startswith(root + os.sep)
+            for root in allowed_roots
+        ):
+            st.error(
+                f"For safety the web UI only scans inside `{Path.cwd()}` or the "
+                "bundled examples. Use the CLI to scan another location."
+            )
+            return
+        target = Path(resolved)
         if not target.exists():
             st.error(f"Path not found: {target}")
             return

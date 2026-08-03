@@ -25,7 +25,10 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: python
-          queries: security-and-quality
+          # Security-focused suite: keeps all security queries (e.g. path
+          # injection) without the code-quality style notes (e.g. flagging the
+          # idiomatic `...` bodies of typing.Protocol stubs).
+          queries: security-extended
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
         with:

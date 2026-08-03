@@ -149,6 +149,23 @@ streamlit run app/streamlit_app.py        # http://localhost:8501
 pqc-audit-rag audit ./path/to/project --md
 ```
 
+### Run the whole stack with Docker
+
+One command brings up the app, Postgres, Grafana **and** a local Ollama (the model
+is pulled automatically on first start):
+
+```bash
+docker compose up -d --build     # or: make up
+#   app      -> http://localhost:8501   (Streamlit UI)
+#   grafana  -> http://localhost:3000   (dashboard "PQC Audit RAG", admin/admin)
+# audits + feedback are persisted to Postgres and show up in Grafana.
+docker compose down              # stop  (make down)   ·   -v to wipe data (make clean)
+```
+
+`make help` lists the common tasks (venv, test, lint, security/SBOM, up/down).
+Dependencies are pinned in `uv.lock` for reproducible installs. The monitoring-only
+stack still lives in `monitoring/docker-compose.yml`.
+
 The UI has an **example picker** (several scenarios: SSH, JWT-style, messaging,
 already-post-quantum) plus a custom path, a verdict banner, severity chips,
 per-exposure cards with cited migration guidance, live progress, and 👍/👎
@@ -335,8 +352,8 @@ relevant code quickly.
 | Interface | `app/streamlit_app.py` (Streamlit UI) | ✅ |
 | Ingestion pipeline | `knowledge_base/ingest.py` (LanceDB) + `ingestion/dlt_pipeline.py` (dlt→DuckDB) | ✅ (automated) |
 | Monitoring | `monitoring.py` (Postgres) + Grafana dashboard (`monitoring/`, 7 charts) + user feedback | ✅ |
-| Containerization | `monitoring/docker-compose.yml` (Postgres + Grafana) | 🟡 monitoring stack |
-| Reproducibility | this README, pinned deps | ⏳ |
+| Containerization | `docker-compose.yml` — app + Postgres + Grafana + Ollama; `Dockerfile`, `Makefile` | ✅ |
+| Reproducibility | this README, `uv.lock`, `docker compose up` | ✅ |
 | Best practices: hybrid search + re-ranking | `search.py`, `evaluation/RESULTS.md` | ✅ |
 | Best practices: query rewriting | `search.py` (heuristic + LLM), `RESULTS.md` | ✅ |
 | Cloud deployment (bonus) | `deploy/` | ⏳ |
@@ -354,7 +371,8 @@ relevant code quickly.
    rewriting best practice.
 5. ✅ Streamlit UI + user feedback.
 6. ✅ Monitoring (Postgres + Grafana, 7 charts) — see below.
-7. ⏳ Containerization (docker-compose for the whole app) + reproducibility polish.
+7. ✅ Containerization: `docker compose up` runs app + Postgres + Grafana + Ollama;
+   `Dockerfile`, `Makefile`, `uv.lock` for reproducibility.
 8. ⏳ Cloud deployment (bonus).
 
 ## Continuous integration & security

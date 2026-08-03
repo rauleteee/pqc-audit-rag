@@ -1,0 +1,94 @@
+# Full stack for PQC Audit RAG — one command runs everything:
+#
+#   docker compose up -d --build
+#
+#   app      -> http://localhost:8501   (Streamlit UI)
+#   grafana  -> http://localhost:3000   (dashboard "PQC Audit RAG", admin/admin)
+#   ollama   -> local LLM (model pulled on first start; see ollama-pull)
+#   postgres -> metrics store (audits + feedback)
+#
+# The monitoring-only stack still lives in monitoring/docker-compose.yml.
+
+name: pqc-audit-rag
+
+services:
+  app:
+    build: .
+    environment:
+      PQC_RAG_PG_DSN: postgresql://pqc:pqc@postgres:5432/pqc_rag
+      OPENAI_BASE_URL: http://ollama:11434/v1
+      OPENAI_API_KEY: ollama
+      PQC_RAG_LLM: ${PQC_RAG_LLM:-llama3.2:3b}
+      PQC_RAG_MAX_TOKENS: ${PQC_RAG_MAX_TOKENS:-700}
+    ports:
+      - "8501:8501"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pqc
+      POSTGRES_PASSWORD: pqc
+      POSTGRES_DB: pqc_rag
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./monitoring/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pqc -d pqc_rag"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_DEFAULT_THEME: light
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:latest
+    # Not published to the host (the app reaches it over the compose network);
+    # avoids clashing with a host Ollama already on 11434. Uncomment to expose:
+    # ports:
+    #   - "11435:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  # One-shot: pull the default model so the app's LLM mode works out of the box.
+  ollama-pull:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c", "ollama pull ${PQC_RAG_LLM:-llama3.2:3b}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  pgdata:
+  grafana-data:
+  ollama-data:

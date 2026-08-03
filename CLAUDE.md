@@ -149,10 +149,17 @@ salvage), `test_monitoring.py`.
 
 ## Next steps
 
-### Phase 7 — Containerization + reproducibility
-- `docker-compose` for **everything**: app (Streamlit), Postgres, Grafana, and
-  Ollama. Pin dependency versions, add a `Makefile`, ensure `docker compose up`
-  runs end-to-end. Add screenshots to the README.
+### Phase 7 — Containerization + reproducibility — DONE
+- Root `docker-compose.yml`: app (Streamlit) + Postgres + Grafana + Ollama, one
+  `docker compose up -d --build`. `Dockerfile` (python:3.12-slim, installs
+  `.[app,local-embed,vector,llm,monitoring]`, bakes the ONNX model), `.dockerignore`,
+  `Makefile` (`make help`), `uv.lock` (pinned deps). Grafana provisioning + schema
+  reused from `monitoring/`. `ollama-pull` one-shot pulls the default model.
+  **Verified:** whole stack healthy, an audit in the app container persisted to the
+  containerized Postgres (Grafana reads it). NOTE: the ollama service port is NOT
+  published (avoids clashing with a host Ollama on 11434); the app reaches it over
+  the compose network. `monitoring/docker-compose.yml` stays as the monitoring-only
+  stack.
 
 ### Phase 8 — Cloud deployment (bonus)
 - Deploy (HF Spaces / Render / a VM). Document it.

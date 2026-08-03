@@ -20,9 +20,9 @@ jobs:
       actions: read
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: python
           # Security-focused suite: keeps all security queries (e.g. path
@@ -30,6 +30,6 @@ jobs:
           # idiomatic `...` bodies of typing.Protocol stubs).
           queries: security-extended
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:python"

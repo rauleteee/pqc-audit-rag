@@ -1,0 +1,27 @@
+name: Keep demo awake
+
+# Pings the Streamlit Community Cloud demo so it doesn't sleep on inactivity.
+# Best-effort: GitHub cron can be delayed under load, and non-2xx (e.g. a wake
+# redirect) is fine — we only need to register a visit. Public repo = free minutes.
+on:
+  schedule:
+    - cron: "*/15 * * * *" # every 15 minutes
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the app
+        run: |
+          URL="https://pqc-audit-rag.streamlit.app"
+          code=$(curl -sSL -o /dev/null -w "%{http_code}" --max-time 60 "$URL" || echo "000")
+          echo "GET $URL -> HTTP $code"
+          curl -sS -o /dev/null --max-time 30 "$URL/_stcore/health" || true

@@ -23,6 +23,4 @@ class AuditJob(BaseModel):
     status: JobStatus = JobStatus.queued
     report: AuditReport | None = None
     error: str | None = None
-    created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

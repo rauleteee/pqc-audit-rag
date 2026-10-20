@@ -1,0 +1,50 @@
+<!doctype html><meta charset="utf-8"><title>en</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1200px;height:720px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:#f6f8fb;color:#1b2733;padding:36px 48px}
+h1{font-size:38px;font-weight:800}
+p.sub{font-size:20px;color:#5b6b7b;margin-top:6px}
+.lab{font-size:16px;font-weight:700;letter-spacing:2px;color:#2f6fb0;margin:22px 0 10px}
+.row{display:flex;align-items:center;gap:12px}
+.step{flex:1;background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 3px 12px #1b27330f;font-size:17px}
+.step b{display:block;font-size:20px;margin-top:4px}
+.step span.i{font-size:34px}
+.ar{font-size:26px;color:#9aa7b4}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.t{background:#fff;border-radius:14px;padding:14px 16px;border-top:6px solid var(--c);box-shadow:0 3px 12px #1b27330f}
+.t .n{font-size:21px;font-weight:800}
+.t .p{font-size:14px;color:#b3472f;margin-top:8px;line-height:1.3}
+.t .s{font-size:15px;color:#1f7a3a;margin-top:6px;line-height:1.3;font-weight:600}
+.t .e{font-size:30px}
+.ba{margin-top:16px;display:flex;gap:14px;align-items:stretch}
+.ba div{flex:1;border-radius:14px;padding:14px 18px;font-size:18px}
+.bad{background:#fdeaea;border-left:6px solid #c0392b}.good{background:#e8f6ec;border-left:6px solid #2e7d32}
+</style>
+<h1>🔐 PQC Audit RAG: post-quantum crypto audit</h1>
+<p class="sub">Finds the encryption a quantum computer could break and proposes how to migrate it. Open source project.</p>
+
+<div class="lab">HOW IT WORKS</div>
+<div class="row">
+<div class="step"><span class="i">📂</span><b>Code</b>link to a repo</div><div class="ar">➜</div>
+<div class="step"><span class="i">🔍</span><b>Scan</b>finds RSA, ECC…</div><div class="ar">➜</div>
+<div class="step"><span class="i">📚</span><b>NIST guidance</b>retrieval (RAG)</div><div class="ar">➜</div>
+<div class="step"><span class="i">🤖</span><b>AI</b>writes the plan</div><div class="ar">➜</div>
+<div class="step"><span class="i">📄</span><b>Report</b>with citations</div>
+</div>
+
+<div class="lab">WHAT'S NEW: TECHNOLOGIES ADDED AND WHAT THEY SOLVE</div>
+<div class="grid">
+<div class="t" style="--c:#2f6fb0"><div class="e">🔌</div><div class="n">FastAPI</div><div class="p">Before: only usable from the web UI or terminal.</div><div class="s">Now: any program can request an audit.</div></div>
+<div class="t" style="--c:#d2691e"><div class="e">📨</div><div class="n">Kafka</div><div class="p">Before: each audit blocked the request for minutes.</div><div class="s">Now: it is queued and replies instantly with a ticket number.</div></div>
+<div class="t" style="--c:#7a4fb5"><div class="e">⚙️</div><div class="n">Worker</div><div class="p">Before: one process both served and worked.</div><div class="s">Now: separate workers; add more under load.</div></div>
+<div class="t" style="--c:#c0392b"><div class="e">🐘</div><div class="n">PostgreSQL</div><div class="p">Before: jobs lived in memory and were lost.</div><div class="s">Now: status and reports stored, queryable later.</div></div>
+</div>
+<div class="grid" style="margin-top:14px;grid-template-columns:repeat(2,1fr)">
+<div class="t" style="--c:#2496ed"><div class="n">🐳 Docker Compose</div><div class="s">One command starts app, API, worker, Kafka, Postgres and Grafana.</div></div>
+<div class="t" style="--c:#2e7d32"><div class="n">🧪 Integration tests in CI</div><div class="s">Every change tests the real flow with Kafka and Postgres.</div></div>
+</div>
+
+<div class="ba">
+<div class="bad">⏳ <b>Before:</b> you requested an audit and waited with a blocked screen.</div>
+<div class="good">🎫 <b>Now:</b> you get a ticket instantly and fetch the result when it is ready.</div>
+</div>

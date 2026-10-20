@@ -34,7 +34,8 @@ app = ["streamlit>=1.36"]
 ingest = ["dlt[duckdb]>=1.0"]
 # Monitoring: persist audits + feedback to Postgres (Grafana dashboard source).
 monitoring = ["psycopg[binary]>=3.1"]
-dev = ["pytest>=7.0"]
+dev = ["pytest>=7.0", "httpx2"]
+api = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]
 
 [project.scripts]
 pqc-audit-rag = "pqc_audit_rag.cli:main"

@@ -22,6 +22,7 @@ def evaluate(retriever, ground_truth: list[dict], k: int = 4) -> dict:
         return {"hit_rate": 0.0, "mrr": 0.0, "n": 0}
     return {"hit_rate": hits / n, "mrr": reciprocal / n, "n": n}
 
+
 def check_mrr_gate(
     rows: dict[str, dict], label: str, minimum: float
 ) -> tuple[bool, str]:
@@ -31,4 +32,7 @@ def check_mrr_gate(
     mrr = rows[label]["mrr"]
     passed = mrr >= minimum
     verdict = "PASSED" if passed else "FAILED"
-    return passed, f"Quality gate {verdict}: {label} MRR {mrr:.3f} (minimum {minimum:.3f})"
+    return (
+        passed,
+        f"Quality gate {verdict}: {label} MRR {mrr:.3f} (minimum {minimum:.3f})",
+    )

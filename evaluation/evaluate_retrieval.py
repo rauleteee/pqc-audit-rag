@@ -19,7 +19,7 @@ from pqc_audit_rag.config import settings
 from pqc_audit_rag.knowledge_base.embedder import get_embedder
 from pqc_audit_rag.knowledge_base.ingest import build_index, load_corpus
 from pqc_audit_rag.knowledge_base.store import InMemoryStore
-from pqc_audit_rag.metrics import evaluate
+from pqc_audit_rag.metrics import check_mrr_gate, evaluate
 from pqc_audit_rag.retrieval import Retriever
 from pqc_audit_rag.search import (
     HybridRetriever,
@@ -120,9 +120,7 @@ def main() -> None:
         print(f"Wrote {RESULTS}")
 
     if args.min_mrr is not None:
-        passed, message = check_mrr_gate(
-            rows, METHOD_LABELS[args.method], args.min_mrr
-        )
+        passed, message = check_mrr_gate(rows, METHOD_LABELS[args.method], args.min_mrr)
         print(message)
         if not passed:
             sys.exit(1)

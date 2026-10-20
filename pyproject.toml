@@ -34,7 +34,10 @@ app = ["streamlit>=1.36"]
 ingest = ["dlt[duckdb]>=1.0"]
 # Monitoring: persist audits + feedback to Postgres (Grafana dashboard source).
 monitoring = ["psycopg[binary]>=3.1"]
-dev = ["pytest>=7.0"]
+dev = ["pytest>=7.0", "httpx2"]
+api = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]
+# Async worker: Kafka client (job queue between the API and the worker).
+queue = ["confluent-kafka>=2.5"]
 
 [project.scripts]
 pqc-audit-rag = "pqc_audit_rag.cli:main"
@@ -49,6 +52,7 @@ include = ["pqc_audit_rag*"]
 [tool.setuptools.package-data]
 # Ship the public corpus with the wheel so ingestion works from an install.
 "pqc_audit_rag.knowledge_base" = ["corpus/*.md"]
+"pqc_audit_rag" = ["migrations/*.sql"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

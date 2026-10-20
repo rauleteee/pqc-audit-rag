@@ -38,6 +38,22 @@ security: ## Bandit + pip-audit + SBOM (local)
 	uvx pip-audit
 	uvx --from cyclonedx-bom cyclonedx-py environment .venv -o sbom.cdx.json --output-format JSON
 
+.PHONY: check
+check: fmt lint test ## Format, lint, test and Bandit: run before every commit
+	uvx bandit -r src -ll
+
+.PHONY: integration
+integration: ## Run the tests that need Kafka + Postgres (make kafka-pg first)
+	PQC_RAG_TEST_PG_DSN=postgresql://pqc:pqc@localhost:5432/pqc_rag \
+	PQC_RAG_TEST_KAFKA_BOOTSTRAP=localhost:9092 \
+	$(PY) -m pytest -q
+
+MIN_MRR ?= 0.69
+
+.PHONY: gate
+gate: ## Retrieval quality gate: fails if MRR < MIN_MRR (needs `make model`)
+	$(PY) evaluation/evaluate_retrieval.py --no-write --min-mrr $(MIN_MRR)
+
 .PHONY: ui
 ui: ## Run the Streamlit UI locally
 	$(PY) -m streamlit run app/streamlit_app.py

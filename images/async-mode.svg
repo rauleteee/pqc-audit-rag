@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <title>PQC Audit RAG — async mode (API, Kafka, worker)</title>
+  <style>
+    .card { rx: 12; stroke-width: 1.5; }
+    .t { font-size: 14px; font-weight: 600; fill: #1b2733; text-anchor: middle; }
+    .s { font-size: 11px; fill: #5b6b7b; text-anchor: middle; }
+    .rail { stroke: #cfd8e3; stroke-width: 2; fill: none; }
+    .msg { fill: #d2691e; animation: m 4s linear infinite; }
+    @keyframes m { 0% { transform: translateX(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateX(560px); opacity: 0; } }
+    .poll { stroke-dasharray: 5 5; animation: d 1.2s linear infinite; fill: none; stroke: #8a97a5; stroke-width: 2; }
+    @keyframes d { to { stroke-dashoffset: -10; } }
+  </style>
+  <rect width="900" height="260" rx="18" fill="#f7f9fc"/>
+  <rect class="card" x="20" y="60" width="140" height="70" fill="#eaf2fb" stroke="#2f6fb0"/>
+  <text class="t" x="90" y="90">🔌 API</text><text class="s" x="90" y="110">replies 202 + job id</text>
+  <rect class="card" x="280" y="60" width="140" height="70" fill="#fff0e8" stroke="#d2691e"/>
+  <text class="t" x="350" y="90">📨 Kafka</text><text class="s" x="350" y="110">audit.requested</text>
+  <rect class="card" x="540" y="60" width="140" height="70" fill="#f4eef9" stroke="#7a4fb5"/>
+  <text class="t" x="610" y="90">⚙️ Worker</text><text class="s" x="610" y="110">runs the audit</text>
+  <rect class="card" x="740" y="60" width="140" height="70" fill="#fdeaea" stroke="#c0392b"/>
+  <text class="t" x="810" y="90">🐘 Postgres</text><text class="s" x="810" y="110">job status + report</text>
+  <path class="rail" d="M160 95H280M420 95H540M680 95H740"/>
+  <g class="msg"><rect x="170" y="88" width="14" height="14" rx="3"/></g>
+  <path class="poll" d="M740 150Q450 215 160 150"/>
+  <text class="s" x="450" y="232">GET /audits/{id} — the client polls: queued → running → done</text>
+  <path class="poll" d="M90 130V150" opacity="0"/>
+  <text class="s" x="450" y="30">Without PQC_RAG_KAFKA_BOOTSTRAP the API runs jobs in-process (no broker needed).</text>
+</svg>

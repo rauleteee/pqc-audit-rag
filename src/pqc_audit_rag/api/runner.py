@@ -16,6 +16,7 @@ def default_synthesizer_factory():
         return FakeSynthesizer
     return LLMSynthesizer
 
+
 def run_job(
     job_id: str,
     store: InMemoryJobStore,

@@ -26,6 +26,7 @@ class InMemoryJobStore:
             self._jobs[job_id] = job
             return job
 
+
 class JobStore(Protocol):
     def create(self, repo_url: str) -> AuditJob: ...
     def get(self, job_id: str) -> AuditJob | None: ...

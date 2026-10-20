@@ -27,7 +27,9 @@ def migrate(dsn: str) -> list[str]:
             if path.name in done:
                 continue
             conn.execute(path.read_text(encoding="utf-8"))
-            conn.execute("INSERT INTO schema_migrations (name) VALUES (%s)", (path.name,))
+            conn.execute(
+                "INSERT INTO schema_migrations (name) VALUES (%s)", (path.name,)
+            )
             applied_now.append(path.name)
     return applied_now
 

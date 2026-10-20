@@ -35,9 +35,7 @@ def process_message(
     if store.claim(job_id) is None:
         log.info("job %s already taken or finished, skipping", job_id)
         return "skipped"
-    run_job(
-        job_id, store, retriever=retriever, synthesizer_factory=synthesizer_factory
-    )
+    run_job(job_id, store, retriever=retriever, synthesizer_factory=synthesizer_factory)
     return "ran"
 
 

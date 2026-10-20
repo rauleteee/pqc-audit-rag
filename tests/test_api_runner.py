@@ -27,6 +27,7 @@ def test_run_job_success(monkeypatch, tmp_path, vulnerable_file, retriever):
     assert done.status == JobStatus.done
     assert done.report is not None
     assert done.report.counts["CRITICAL"] >= 1
+    assert done.report.path == job.repo_url
     assert not repo.exists()  # the temp repo was cleaned up
 
 

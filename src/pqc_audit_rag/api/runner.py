@@ -26,6 +26,7 @@ def run_job(
             retriever=retriever,
             synthesizer=synthesizer_factory(),
         )
+        report = report.model_copy(update={"path": job.repo_url})
         store.update(job_id, status=JobStatus.done, report=report)
     except SourceError as exc:
         store.update(job_id, status=JobStatus.failed, error=str(exc))

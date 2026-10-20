@@ -1,5 +1,6 @@
 import threading
 import uuid
+from typing import Protocol
 
 from pqc_audit_rag.api.schemas import AuditJob
 
@@ -24,3 +25,8 @@ class InMemoryJobStore:
             job = self._jobs[job_id].model_copy(update=fields)
             self._jobs[job_id] = job
             return job
+
+class JobStore(Protocol):
+    def create(self, repo_url: str) -> AuditJob: ...
+    def get(self, job_id: str) -> AuditJob | None: ...
+    def update(self, job_id: str, **fields) -> AuditJob: ...

@@ -52,6 +52,7 @@ include = ["pqc_audit_rag*"]
 [tool.setuptools.package-data]
 # Ship the public corpus with the wheel so ingestion works from an install.
 "pqc_audit_rag.knowledge_base" = ["corpus/*.md"]
+"pqc_audit_rag" = ["migrations/*.sql"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

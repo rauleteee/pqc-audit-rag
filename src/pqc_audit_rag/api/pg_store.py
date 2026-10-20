@@ -44,7 +44,7 @@ class PostgresJobStore:
         if unknown:
             raise ValueError(f"cannot update fields: {sorted(unknown)}")
         values = []
-        for value in fields.items():
+        for value in fields.values():
             if isinstance(value, JobStatus):
                 value = value.value
             elif isinstance(value, AuditReport):
@@ -60,3 +60,13 @@ class PostgresJobStore:
         if row is None:
             raise KeyError(job_id)
         return AuditJob.model_validate(row)
+
+    def claim(self, job_id: str) -> AuditJob | None:
+        """Atomically move queued -> running. None if someone got there first."""
+        with self._connect() as conn:
+            row = conn.execute(
+                f"UPDATE audit_job SET status = 'running', updated_at = now() "
+                f"WHERE id = %s AND status = 'queued' RETURNING {_COLUMNS}",
+                (job_id,),
+            ).fetchone()
+        return AuditJob.model_validate(row) if row else None

@@ -1,0 +1,37 @@
+🔐 ¿Qué criptografía vulnerable a lo cuántico se esconde en tu código?
+
+El "recolecta ahora, descifra después" es real, con plazos de migración PQC hasta
+2030–35. Lo difícil es la visibilidad: no puedes migrar lo que no puedes ver.
+
+Por eso he construido PQC Audit RAG (open source): escanea un repo Python → encuentra
+cripto vulnerable (RSA, ECC, DSA, DH, Ed25519) → genera un plan de migración
+post-cuántica citado, hallazgo a hallazgo (RAG + LLM). Mi proyecto final del LLM Zoomcamp.
+
+👇 En la captura: escaneando un repo público de GitHub y su plan de migración ECDSA → ML-DSA.
+
+▶️ Demo (escanea un repo público o sube el tuyo; dale unos segundos para arrancar):
+https://pqc-audit-rag.streamlit.app  ·  prueba: https://github.com/paramiko/paramiko
+⭐ Código: https://github.com/rauleteee/pqc-audit-rag
+
+Se agradece feedback — y si tu equipo mira la migración post-cuántica, hablemos.
+
+— — —
+
+🔐 What quantum-vulnerable crypto is hiding in your code?
+
+"Harvest now, decrypt later" is real, with PQC migration deadlines through 2030–35.
+The hard part is visibility — you can't migrate what you can't see.
+
+So I built PQC Audit RAG (open source): scan a Python repo → find quantum-vulnerable
+crypto (RSA, ECC, DSA, DH, Ed25519) → get a cited, per-finding post-quantum migration
+plan (RAG + LLM). My LLM Zoomcamp final project.
+
+👇 In the screenshot: scanning a public GitHub repo and its ECDSA → ML-DSA migration plan.
+
+▶️ Live demo (scan a public repo or upload yours; give it a few seconds to wake):
+https://pqc-audit-rag.streamlit.app  ·  try: https://github.com/paramiko/paramiko
+⭐ Code: https://github.com/rauleteee/pqc-audit-rag
+
+Feedback welcome — and if your team is looking at post-quantum migration, let's talk.
+
+#PostQuantum #PQC #Cryptography #RAG #LLM #Cybersecurity #OpenSource

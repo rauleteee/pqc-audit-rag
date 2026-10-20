@@ -269,6 +269,26 @@ uv pip install -e ".[dev]"
 pytest -q
 ```
 
+## REST API
+
+```bash
+uv pip install -e ".[api]"
+PQC_RAG_API_OFFLINE=1 uvicorn pqc_audit_rag.api.main:app   # no LLM needed
+```
+
+| Endpoint | What it does |
+|---|---|
+| `POST /audits` | Start an audit of a public repo. Returns `202` and a job `id`. |
+| `GET /audits/{id}` | Job status (`queued`, `running`, `done`, `failed`) and the report. |
+| `GET /health` | Liveness check. |
+
+```bash
+curl -X POST localhost:8000/audits -H "Content-Type: application/json" \
+  -d '{"repo_url": "https://github.com/paramiko/paramiko"}'
+```
+
+Interactive docs at `http://localhost:8000/docs`.
+
 ## Retrieval evaluation
 
 Four retrieval strategies are evaluated against a ground-truth question set

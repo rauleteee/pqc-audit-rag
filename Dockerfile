@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
 COPY pyproject.toml README.md ./
 COPY src ./src
 RUN pip install --upgrade pip && \
-    pip install -e ".[app,local-embed,vector,llm,monitoring]"
+    pip install -e ".[app,local-embed,vector,llm,monitoring,api,queue]"
 
 # Bake the local ONNX embedding model into the image (offline at runtime).
 RUN python -m pqc_audit_rag.knowledge_base.download_model

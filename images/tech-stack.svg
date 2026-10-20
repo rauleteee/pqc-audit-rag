@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <title>PQC Audit RAG — tech stack</title>
+  <style>
+    .flow { stroke-dasharray: 6 6; animation: dash 1.2s linear infinite; fill: none; stroke-width: 2; }
+    @keyframes dash { to { stroke-dashoffset: -12; } }
+    .card { rx: 12; stroke-width: 1.5; }
+    .t { font-size: 14px; font-weight: 600; fill: #1b2733; text-anchor: middle; }
+    .s { font-size: 11px; fill: #5b6b7b; text-anchor: middle; }
+    .h { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; fill: #7a8896; }
+    .pulse { animation: pulse 3s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .55; } }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a97a5"/></marker>
+  </defs>
+  <rect width="900" height="520" rx="18" fill="#f7f9fc"/>
+
+  <text class="h" x="30" y="38">INTERFACES</text>
+  <g>
+    <rect class="card" x="60" y="50" width="220" height="64" fill="#eaf2fb" stroke="#2f6fb0"/>
+    <text class="t" x="170" y="78">🖥️ Streamlit UI</text><text class="s" x="170" y="98">scan · report · 👍/👎</text>
+    <rect class="card" x="340" y="50" width="220" height="64" fill="#eaf2fb" stroke="#2f6fb0"/>
+    <text class="t" x="450" y="78">⌨️ CLI</text><text class="s" x="450" y="98">pqc-audit-rag audit</text>
+    <rect class="card" x="620" y="50" width="220" height="64" fill="#eaf2fb" stroke="#2f6fb0"/>
+    <text class="t" x="730" y="78">🔌 REST API · FastAPI</text><text class="s" x="730" y="98">POST /audits → job id</text>
+  </g>
+
+  <text class="h" x="30" y="158">CORE PIPELINE</text>
+  <g>
+    <rect class="card" x="30" y="170" width="150" height="70" fill="#fff4e0" stroke="#c77800"/>
+    <text class="t" x="105" y="198">🔍 Scan</text><text class="s" x="105" y="218">pqc-audit (AST)</text>
+    <rect class="card" x="205" y="170" width="150" height="70" fill="#fff4e0" stroke="#c77800"/>
+    <text class="t" x="280" y="198">🧩 Group</text><text class="s" x="280" y="218">findings → exposures</text>
+    <rect class="card" x="380" y="170" width="150" height="70" fill="#eef7ee" stroke="#2e7d32"/>
+    <text class="t" x="455" y="198">📚 Retrieve</text><text class="s" x="455" y="218">hybrid + rerank</text>
+    <rect class="card" x="555" y="170" width="150" height="70" fill="#f4eef9" stroke="#7a4fb5"/>
+    <text class="t" x="630" y="198">🤖 Synthesize</text><text class="s" x="630" y="218">cited migration plan</text>
+    <rect class="card" x="730" y="170" width="140" height="70" fill="#fff4e0" stroke="#c77800"/>
+    <text class="t" x="800" y="198">📄 Report</text><text class="s" x="800" y="218">Markdown / HTML</text>
+  </g>
+  <g stroke="#8a97a5" marker-end="url(#a)">
+    <path class="flow" d="M180 205H203"/><path class="flow" d="M355 205H378"/>
+    <path class="flow" d="M530 205H553"/><path class="flow" d="M705 205H728"/>
+  </g>
+  <g stroke="#8a97a5" fill="none" stroke-width="2"><path d="M170 114V138M450 114V138M730 114V138M160 138H730"/></g>
+  <path class="flow" stroke="#8a97a5" marker-end="url(#a)" d="M160 138V168"/>
+
+  <text class="h" x="30" y="290">DATA &amp; SERVICES</text>
+  <g>
+    <rect class="card" x="30" y="302" width="200" height="86" fill="#eef7ee" stroke="#2e7d32"/>
+    <text class="t" x="130" y="330">🗂️ Knowledge base</text>
+    <text class="s" x="130" y="350">8 Markdown docs · ~45 chunks</text>
+    <text class="s" x="130" y="368">ONNX MiniLM · LanceDB · minsearch</text>
+
+    <rect class="card" x="250" y="302" width="200" height="86" fill="#f4eef9" stroke="#7a4fb5"/>
+    <text class="t" x="350" y="330">🧠 LLM</text>
+    <text class="s" x="350" y="350">Ollama (local, free)</text>
+    <text class="s" x="350" y="368">or Groq / OpenAI-compatible</text>
+
+    <rect class="card" x="470" y="302" width="200" height="86" fill="#fdeaea" stroke="#c0392b"/>
+    <text class="t" x="570" y="330">🐘 Postgres</text>
+    <text class="s" x="570" y="350">audit runs · jobs · feedback</text>
+    <text class="s" x="570" y="368">migrations in SQL</text>
+
+    <rect class="card" x="690" y="302" width="180" height="86" fill="#fff0e8" stroke="#d2691e"/>
+    <text class="t" x="780" y="330">📨 Kafka</text>
+    <text class="s" x="780" y="350">queue "audit.requested"</text>
+    <text class="s" x="780" y="368">→ background worker</text>
+  </g>
+  <g stroke="#8a97a5" marker-end="url(#a)">
+    <path class="flow" d="M455 240V270H200V300"/>
+    <path class="flow" d="M630 240V270H350V300"/>
+    <path class="flow" d="M840 82H885V270H780V300"/>
+    <path class="flow" d="M690 345H672"/>
+  </g>
+
+  <text class="h" x="30" y="432">QUALITY &amp; OPS</text>
+  <g>
+    <rect class="card" x="30" y="444" width="200" height="56" fill="#fff" stroke="#9aa7b4"/>
+    <text class="t" x="130" y="469">📊 Grafana</text><text class="s" x="130" y="487">7 charts on Postgres</text>
+    <rect class="card" x="250" y="444" width="200" height="56" fill="#fff" stroke="#9aa7b4"/>
+    <text class="t" x="350" y="469">🧪 Evaluation</text><text class="s" x="350" y="487">Hit Rate / MRR · LLM-as-judge</text>
+    <rect class="card" x="470" y="444" width="200" height="56" fill="#fff" stroke="#9aa7b4"/>
+    <text class="t" x="570" y="469">🐳 Docker Compose</text><text class="s" x="570" y="487">one command, whole stack</text>
+    <rect class="card" x="690" y="444" width="180" height="56" fill="#fff" stroke="#9aa7b4"/>
+    <text class="t" x="780" y="469">🛡️ CI / Security</text><text class="s" x="780" y="487">ruff · pytest · CodeQL · SBOM</text>
+  </g>
+  <path class="flow" stroke="#8a97a5" marker-end="url(#a)" d="M570 388V412H200V442"/>
+</svg>

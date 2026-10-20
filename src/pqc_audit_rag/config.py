@@ -67,5 +67,10 @@ class Settings:
     # Empty by default -> monitoring is a no-op (the free stack needs no server).
     pg_dsn: str = os.environ.get("PQC_RAG_PG_DSN", "")
 
+    # Async worker: Kafka bootstrap server ("host:port"). Empty -> the API runs
+    # jobs in-process like before (the free stack needs no broker).
+    kafka_bootstrap: str = os.environ.get("PQC_RAG_KAFKA_BOOTSTRAP", "")
+    kafka_topic: str = os.environ.get("PQC_RAG_KAFKA_TOPIC", "audit.requested")
+
 
 settings = Settings()

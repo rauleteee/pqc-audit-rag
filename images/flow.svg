@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 200" width="900" height="200" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <title>PQC Audit RAG — audit flow</title>
+  <style>
+    .t { font-size: 13px; font-weight: 600; fill: #1b2733; text-anchor: middle; }
+    .s { font-size: 11px; fill: #5b6b7b; text-anchor: middle; }
+    .e { font-size: 28px; text-anchor: middle; }
+    .rail { stroke: #cfd8e3; stroke-width: 3; fill: none; }
+    .dot { fill: #2f6fb0; animation: move 6s linear infinite; }
+    @keyframes move { from { transform: translateX(0); } to { transform: translateX(780px); } }
+    .step { animation: glow 6s linear infinite; }
+    .step:nth-of-type(2) { animation-delay: 1.2s; } .step:nth-of-type(3) { animation-delay: 2.4s; }
+    .step:nth-of-type(4) { animation-delay: 3.6s; } .step:nth-of-type(5) { animation-delay: 4.8s; }
+    @keyframes glow { 0%,20%,100% { opacity: 1; } 5%,15% { opacity: 1; } 40%,80% { opacity: .75; } }
+  </style>
+  <rect width="900" height="200" rx="18" fill="#f7f9fc"/>
+  <path class="rail" d="M60 80H840"/>
+  <circle class="dot" cx="60" cy="80" r="7"/>
+  <g class="step"><circle cx="60" cy="80" r="30" fill="#eaf2fb" stroke="#2f6fb0" stroke-width="2"/><text class="e" x="60" y="91">📂</text><text class="t" x="60" y="136">Your code</text><text class="s" x="60" y="154">repo URL / zip</text></g>
+  <g class="step"><circle cx="255" cy="80" r="30" fill="#fff4e0" stroke="#c77800" stroke-width="2"/><text class="e" x="255" y="91">🔍</text><text class="t" x="255" y="136">Scan</text><text class="s" x="255" y="154">finds RSA, ECC, DSA…</text></g>
+  <g class="step"><circle cx="450" cy="80" r="30" fill="#eef7ee" stroke="#2e7d32" stroke-width="2"/><text class="e" x="450" y="91">📚</text><text class="t" x="450" y="136">Retrieve</text><text class="s" x="450" y="154">NIST guidance (RAG)</text></g>
+  <g class="step"><circle cx="645" cy="80" r="30" fill="#f4eef9" stroke="#7a4fb5" stroke-width="2"/><text class="e" x="645" y="91">🤖</text><text class="t" x="645" y="136">LLM writes</text><text class="s" x="645" y="154">cited plan per finding</text></g>
+  <g class="step"><circle cx="840" cy="80" r="30" fill="#fdeaea" stroke="#c0392b" stroke-width="2"/><text class="e" x="840" y="91">📄</text><text class="t" x="840" y="136">Report</text><text class="s" x="840" y="154">+ metrics &amp; feedback</text></g>
+  <text class="s" x="450" y="188">Deterministic code drives every step — the LLM only writes the prose.</text>
+</svg>

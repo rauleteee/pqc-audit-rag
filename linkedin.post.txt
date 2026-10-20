@@ -1,0 +1,18 @@
+🔐 ¿Tu software resistirá a los ordenadores cuánticos?
+
+Sigo mejorando mi proyecto PQC Audit RAG, que revisa un proyecto de código, detecta la criptografía que un ordenador cuántico podría romper y genera un plan de migración con ayuda de IA.
+
+Lo nuevo en las últimas dos ramas 👇
+
+🔌 API REST: ahora cualquiera puede pedir una auditoría pegando el enlace de un repositorio y recibe un ticket al instante.
+📨 Trabajo en segundo plano: las auditorías se ponen en cola (Kafka) y un worker las procesa sin bloquear a nadie.
+🐘 Estado siempre guardado: cada trabajo y su informe quedan en Postgres.
+🐳 Todo arranca con un solo comando (Docker Compose) y se valida con tests de integración en CI.
+
+Resultado: más robusto, escalable y listo para integrarse con otras herramientas ⚡
+
+🆓 Open source, y funciona con IA local gratuita.
+
+👉 Repo: github.com/rauleteee/pqc-audit-rag
+
+#Ciberseguridad #PostQuantum #IA #Kafka #Python #OpenSource

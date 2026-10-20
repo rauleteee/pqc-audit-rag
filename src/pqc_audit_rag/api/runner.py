@@ -1,3 +1,4 @@
+import os
 import shutil
 from collections.abc import Callable
 from pathlib import Path
@@ -6,7 +7,14 @@ from pqc_audit_rag.api.schemas import JobStatus
 from pqc_audit_rag.api.store import InMemoryJobStore
 from pqc_audit_rag.pipeline import run_audit
 from pqc_audit_rag.sources import SourceError, clone_github_repo
-from pqc_audit_rag.synthesis import Synthesizer
+from pqc_audit_rag.synthesis import FakeSynthesizer, LLMSynthesizer, Synthesizer
+
+
+def default_synthesizer_factory():
+    offline = os.environ.get("PQC_RAG_API_OFFLINE", "").lower()
+    if offline in ("1", "true", "yes"):
+        return FakeSynthesizer
+    return LLMSynthesizer
 
 
 def run_job(

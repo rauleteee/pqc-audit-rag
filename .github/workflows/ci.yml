@@ -87,6 +87,32 @@ jobs:
       - name: Run tests against real Kafka and Postgres
         run: pytest -q
 
+  quality-gate:
+    name: Retrieval quality gate (MRR)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install (local embeddings)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[local-embed]"
+      - name: Cache the ONNX embedding model
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: onnx-model-${{ hashFiles('src/pqc_audit_rag/knowledge_base/download_model.py') }}
+      - name: Download the embedding model
+        run: python -m pqc_audit_rag.knowledge_base.download_model
+      - name: Evaluate retrieval (gate)
+        run: |
+          set -o pipefail
+          python evaluation/evaluate_retrieval.py --no-write --min-mrr 0.69 | tee -a "$GITHUB_STEP_SUMMARY"
+          
   build:
     name: Build & check package
     runs-on: ubuntu-latest
